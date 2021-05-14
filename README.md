@@ -2,7 +2,6 @@
 The **SISL Toolbox** library is built on top of *SISL* library.
 
 ## Documentation
-#Full doxygen-generated documentation can be found at: [RML Documentation](https://merosss.bitbucket.io/rml).
 
 ## Features
 
@@ -11,7 +10,7 @@ The **SISL Toolbox** library is built on top of *SISL* library.
 Before building the repository you will have to install the following dependencies:
 * Eigen 3: `sudo apt install libeigen3-dev`
 * SISL: `git clone https://github.com/SINTEF-Geometry/SISL.git`
-* Geographic Library (for Ubuntu: sudo apt-get install -y libgeographic-dev)
+* Geographic Library 'sudo apt-get install -y libgeographic-dev'
 
 
 ## Building and installing
