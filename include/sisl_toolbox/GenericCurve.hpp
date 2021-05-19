@@ -26,11 +26,25 @@ public:
         std::vector<double> weights, std::vector<double> coefficients);
 
     // Getter / Setter methods
-    auto Degree() {return degree_;}
-    auto Knots() {return knots_;}
-    auto Points() {return points_;}
-    auto Weights() {return weights_;}
-    auto Coefficients() {return coefficients_;}
+    auto Degree() const& {return degree_;}
+    auto Degree() & {return degree_;}
+    auto Degree() && {return std::move(degree_);}
+
+    auto Knots() const& {return knots_;}
+    auto Knots() & {return knots_;}
+    auto Knots() && {return std::move(knots_);}
+
+    auto Points() const& {return points_;}
+    auto Points() & {return points_;}
+    auto Points() && {return std::move(points_);}
+
+    auto Weights() const& {return weights_;}
+    auto Weights() & {return weights_;}
+    auto Weights() && {return std::move(weights_);}
+
+    auto Coefficients() const& {return coefficients_;}
+    auto Coefficients() & {return coefficients_;}
+    auto Coefficients() && {return std::move(coefficients_);}
 
 private:
     int degree_;

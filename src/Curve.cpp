@@ -23,7 +23,7 @@ Curve::Curve(int dimension, int order, int type, SISLCurve *curve)
     }
 
 
-bool Curve::SaveCurve(int samples, std::string path, std::string mode)
+bool Curve::SaveCurve(int const samples, std::string const path, std::string const mode) const
 {
     try {
         std::shared_ptr<std::ofstream> file;
@@ -41,7 +41,7 @@ bool Curve::SaveCurve(int samples, std::string path, std::string mode)
         std::array<double, 3> pos{0};
 
         for (double k = 0; k < samples; ++k) {
-            param = k / samples * endParameter_;
+            param = k / (samples - 1) * endParameter_;
             s1221(curve_, 0, param, &left, &pos[0], &status);
             
             *file << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
@@ -55,7 +55,7 @@ bool Curve::SaveCurve(int samples, std::string path, std::string mode)
     }
 }
 
-void Curve::FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position) 
+void Curve::FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position)
 {
     int left{0}; // The SISL routine needs this variable, but it does not use the value.
     if(abscissa < startParameter_) abscissa = startParameter_;
@@ -63,7 +63,6 @@ void Curve::FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position)
     // The second parameters is set to zero in order to compute the position without the successive derivatives.
     s1221(curve_, 0, abscissa, &left, &worldF_position[0], &statusFlag_);
 }
-
 
 
 std::shared_ptr<Curve> Curve::ExtractCurveSection(double startValue, double endValue, double& beyondLowerLimit, double& beyondUpperLimit) {
@@ -82,9 +81,9 @@ std::shared_ptr<Curve> Curve::ExtractCurveSection(double startValue, double endV
     SISLCurve* curveSection;
     s1712(curve_, startValue, endValue, &curveSection, &statusFlag_);
 
-    std::cout << "beyondUpperLimit: " << beyondUpperLimit << std::endl;
+    //std::cout << "beyondUpperLimit: " << beyondUpperLimit << std::endl;
 
-    return std::make_shared<Curve>(this->type_, this->dimension_, this->order_, curveSection);
+    return std::make_shared<Curve>(type_, dimension_, order_, curveSection);
 }
 
 
@@ -99,7 +98,7 @@ std::tuple<double, double> Curve::FindClosestPoint(Eigen::Vector3d& worldF_posit
     return std::make_tuple(abscissa, distance);
 }
 
-double Curve::AlongCurveDistance(double abscissa) 
+double Curve::AlongCurveDistance(double const abscissa) 
 {
     return abscissa * (length_ / endParameter_);
 }
@@ -117,4 +116,39 @@ void Curve::EvalTangentFrame(double abscissa, Eigen::Vector3d& tangent, Eigen::V
 void Curve::Reverse() 
 {
     s1706(curve_);
+}
+
+std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCurve) {
+    
+    double epsco{0};
+    int intersectionsNum{0};
+    double * intersectionsFirstCurve; // 
+    double * intersectionsSecondCurve;
+    int numintcu{0};
+    SISLIntcurve **intcurve;
+
+    s1857(curve_, otherCurve->CurvePtr(), epsco, epsge_, &intersectionsNum, &intersectionsFirstCurve, &intersectionsSecondCurve, 
+        &numintcu, &intcurve, &statusFlag_);
+
+    //std::cout << "intersectionsNum: " << intersectionsNum << ", numintcu: " << numintcu << std::endl;
+
+    std::vector<Eigen::Vector3d> intersections{};
+    Eigen::Vector3d intersectionPoint;
+
+
+    for(auto i = 0; i < intersectionsNum; ++i) {
+        FromAbsToPos(intersectionsFirstCurve[i], intersectionPoint);
+        
+        intersectionPoint[0] = std::round(intersectionPoint[0] * 1000) / 1000;
+        intersectionPoint[1] = std::round(intersectionPoint[1] * 1000) / 1000;
+        intersectionPoint[2] = std::round(intersectionPoint[2] * 1000) / 1000;
+
+        if (std::count(intersections.begin(), intersections.end(), intersectionPoint) == 0) {
+            intersections.push_back(intersectionPoint);
+        }
+    }
+
+
+    return intersections;
+
 }

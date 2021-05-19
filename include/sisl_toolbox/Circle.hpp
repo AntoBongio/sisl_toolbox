@@ -21,9 +21,17 @@ public:
     Circle(int type, int dimension, int order, double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint);
 
     // Getter / Setter methods
-    auto Angle() {return angle_;}
-    Eigen::Vector3d Axis() {return axis_;}
-    Eigen::Vector3d CentrePoint() {return centrePoint_;}
+    auto Angle() const& {return angle_;}
+    auto Angle() & {return angle_;}
+    auto Angle() && {return std::move(angle_);}
+
+    auto Axis() const& {return axis_;}
+    auto Axis() & {return axis_;}
+    auto Axis() && {return std::move(axis_);}
+
+    auto CentrePoint() const& {return centrePoint_;}
+    auto CentrePoint() & {return centrePoint_;}
+    auto CentrePoint() && {return std::move(centrePoint_);}
 
 private:
     double angle_;

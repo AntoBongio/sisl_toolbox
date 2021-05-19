@@ -1,15 +1,18 @@
 #include "sisl_toolbox/Path.hpp"
 
+#include <iomanip>
+
 Path::Path()
 : curvesNumber_{0} 
 , length_{0} 
 , currentAbscissa_ {0}
 , currentCurveId_{0} {}
 
-Path::Path(std::vector<Parameters>& parameters)
-: curvesNumber_{0} 
-, length_{0}
-, currentCurveId_{0} {
+Path::Path(std::vector<Parameters> & parameters)
+    : curvesNumber_{0} 
+    , length_{0}
+    , currentAbscissa_ {0}
+    , currentCurveId_{0} {
 
     for(const auto& elem: parameters) {
         switch(elem.type){
@@ -42,7 +45,84 @@ Path::Path(std::vector<Parameters>& parameters)
     currentAbscissa_ = curves_[0]->StartParameter();
 }
 
-/** TODO: Fare la funzione ADD per aggiungere una curva ad inizio, fine o in mezzo! */
+Path::Path(std::vector<Eigen::Vector3d>& points)
+    : curvesNumber_{0} 
+    , length_{0} {
+
+    for(int i = 0; i < points.size() - 1; ++i) {
+        std::cout << "Segment(" << i << ") -> From [" << points[i][0] << ", " << points[i][1] << ", " << points[i][2] << "] to [" 
+            << points[i+1][0] << ", " << points[i+1][1] << ", " << points[i+1][2] << "]" << std::endl;
+        curves_.emplace_back(std::make_shared<StraightLine>(1, 3, 3, points[i], points[i+1]));
+        ++curvesNumber_;
+    }
+    std::cout << "Segment(" << points.size() - 1 << ") -> From [" << points[points.size() - 1][0] << ", " 
+        << points[points.size() - 1][1] << ", " << points[points.size() - 1][2] << "] to [" 
+        << points[0][0] << ", " << points[0][1] << ", " << points[0][2] << "]" << std::endl;
+    curves_.emplace_back(std::make_shared<StraightLine>(1, 3, 3, points[points.size() - 1], points[0]));
+    ++curvesNumber_;
+    /*
+    for(auto it = points.begin(); it != points.end(); ++it) {
+        std::cout << "First: " << (*it)[0] << ", second: " << (*(++it))[0] << std::endl; 
+        curves_.emplace_back(std::make_shared<StraightLine>(1, 3, 3, *it, *(++it)));
+        ++curvesNumber_;
+    }
+    */
+
+    for (const auto & curve: curves_) {
+        length_ += curve->Length();
+    }
+
+    std::cout << "curvesNumber_: " << curvesNumber_ << std::endl;
+
+}
+
+Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces)
+    : curvesNumber_{0} 
+    , length_{0} {
+
+    auto polygon = std::make_shared<Path>(polygonVerteces);
+    polygon->SavePath(120, "/home/antonino/Desktop/sisl_toolbox/script/polygon.txt");
+
+    // Compute the rectangle surrounding the polygon
+    double maxX{polygonVerteces[0][0]};
+    double minX{polygonVerteces[0][0]};
+    double maxY{polygonVerteces[0][1]};
+    double minY{polygonVerteces[0][1]};
+    for(auto i = 1; i < polygonVerteces.size(); i++) {
+        if(maxX < polygonVerteces[i][0])
+            maxX = polygonVerteces[i][0];
+        if(minX > polygonVerteces[i][0])
+            minX = polygonVerteces[i][0];   
+
+        if(maxY < polygonVerteces[i][1])
+            maxY = polygonVerteces[i][1];
+        if(minY > polygonVerteces[i][1])
+            minY = polygonVerteces[i][1];  
+    }
+    std::vector<Eigen::Vector3d> rectangleVertices{Eigen::Vector3d{maxX, maxY, 0}, Eigen::Vector3d{maxX, minY, 0},
+                                                   Eigen::Vector3d{minX, minY, 0}, Eigen::Vector3d{minX, maxY, 0}};
+    auto rectangle = std::make_shared<Path>(rectangleVertices);
+    rectangle->SavePath(120, "/home/antonino/Desktop/sisl_toolbox/script/rectangle.txt");
+
+
+    auto parallelStraightLines = std::make_shared<Path>();
+
+    /** TODO: COntinuare da qua */
+    double movingX{maxX};
+    double movingY{minY};
+    while(movingX > minX and movingY < maxY) {
+        movingX -= std::cos(-angle) * offset;
+        movingY += std::sin(-angle) * offset;
+        std::cout << "minX: "<< minX << ", movingX: " << movingX << ", maxY: "<< maxY << ", movingY: " << movingY << std::endl;
+        auto line = std::make_shared<StraightLine>(1, 3, 3, Eigen::Vector3d{movingX, minY, 0}, Eigen::Vector3d{maxX, movingY, 0});
+        parallelStraightLines->AddCurveBack(line);
+    }
+    
+
+    parallelStraightLines->SavePath(120, "/home/antonino/Desktop/sisl_toolbox/script/parallelStraightLines.txt");
+
+}
+
 
 template <typename T>
 void Path::AddCurveBack(std::shared_ptr<T> curve) {
@@ -53,7 +133,7 @@ void Path::AddCurveBack(std::shared_ptr<T> curve) {
 }
 
 
-void Path::SavePath(int samples, std::string path) {
+void Path::SavePath(int samples, std::string const path) const {
 
     int singleCurveSamples{ static_cast<int>(samples / curvesNumber_) };
 
@@ -164,7 +244,7 @@ void Path::ExtractSection(double offset, std::shared_ptr<Path>& pathPortion) {
     }
 }
 
-double Path::AlongPathDistance() {
+double Path::AlongPathDistance() const {
 
     double distance{0};
     for(int i = 0; i < currentCurveId_; ++i) {
@@ -259,4 +339,27 @@ void Path::MoveState(double offset, double& abscissa, int& curveId, Eigen::Vecto
             curves_[curveId]->FromAbsToPos(abscissa, point);
         }
     }
+}
+
+std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Path> otherPath) {
+
+    std::vector<Eigen::Vector3d> intersections;
+
+    for(auto const & curve: curves_) {
+        for(auto const & otherCurve: otherPath->Curves()) {
+
+            auto intersectionPoints = curve->Intersection(otherCurve);
+
+            for (auto const & point: intersectionPoints) {
+
+                for(auto const & intersection: intersections) {
+                }
+                if (std::count(intersections.begin(), intersections.end(), point) == 0) {
+                    intersections.push_back(point);
+                }
+            }
+        }
+    }
+
+    return intersections;
 }

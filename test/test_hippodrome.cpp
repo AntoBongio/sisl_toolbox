@@ -1,5 +1,7 @@
 #include "test/test_hippodrome.hpp"
 
+#include <iomanip>
+
 
 int main(int argc, char** argv) {
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <vector>
 
 #include <eigen3/Eigen/Dense>
 
@@ -45,7 +46,7 @@ public:
     * e.g.: "/home/antonino/Desktop/curve.txt".
     * @param[in] mode To select "write" or "append" mode.
     */
-    bool SaveCurve(int samples, std::string path, std::string mode);
+    bool SaveCurve(int const samples, std::string const path, std::string const mode) const;
 
     /**
     * @brief Compute the position and the right-hand derivatives of a curve at a given parameter value.
@@ -84,7 +85,7 @@ public:
     * 
     * @return The along curve distance in meters from the stating point of the curve to abscissa parameter.
     */
-    double AlongCurveDistance(double abscissa);
+    double AlongCurveDistance(double const abscissa);
 
     /**
     * @brief Transform the abscissa value into a distance in meters from the starting point.
@@ -102,29 +103,53 @@ public:
     */
     void Reverse();
 
-    /**
-    * @brief Moves a point of an offset (in m) along the curve. The point is expressed as abscissa.
-    * @param[in] offset - offset expressed in meters
-    * @param[in] abscissa - Starting abscissa position
-    * 
-    * @return The new abscissa value
-    */
-    double MoveAlongCurve(double offset, double abscissa);
+    std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
 
 
     // Getter / Setter
-    auto Dimension() {return dimension_;}
-    auto Order() {return order_;}
-    auto Epsge() {return epsge_;}
-    auto Type() {return type_;}
+    auto Dimension() const& {return dimension_;}
+    auto Dimension() & {return dimension_;}
+    auto Dimension() && {return std::move(dimension_);}
 
-    auto CurvePtr() {return curve_;}
-    auto StatusFlag() {return statusFlag_;}
-    auto StartParameter()  {return startParameter_;}
-    auto EndParameter()  {return endParameter_;}
-    auto Length() {return length_;}
-    auto StartPoint() {return startPoint_;}
-    auto EndPoint() {return endPoint_;}
+    auto Order() const& {return order_;}
+    auto Order() & {return order_;}
+    auto Order() && {return std::move(order_);}
+
+    auto Epsge() const& {return epsge_;}
+    auto Epsge() & {return epsge_;}
+    auto Epsge() && {return std::move(epsge_);}
+
+    auto Type() const& {return type_;}
+    auto Type() & {return type_;}
+    auto Type() && {return std::move(type_);}
+
+    auto CurvePtr() const& {return curve_;}
+    auto CurvePtr() & {return curve_;}
+    auto CurvePtr() && {return std::move(curve_);}
+    
+    auto StatusFlag() const& {return statusFlag_;}
+    auto StatusFlag() & {return statusFlag_;}
+    auto StatusFlag() && {return std::move(statusFlag_);}
+
+    auto StartParameter() const& {return startParameter_;}
+    auto StartParameter() & {return startParameter_;}
+    auto StartParameter() && {return std::move(startParameter_);}
+
+    auto EndParameter() const& {return endParameter_;}
+    auto EndParameter() & {return endParameter_;}
+    auto EndParameter() && {return std::move(endParameter_);}
+
+    auto Length() const& {return length_;}
+    auto Length() & {return length_;}
+    auto Length() && {return std::move(length_);}
+
+    auto StartPoint() const& {return startPoint_;}
+    auto StartPoint() & {return startPoint_;}
+    auto StartPoint() && {return std::move(startPoint_);}
+
+    auto EndPoint() const& {return endPoint_;}
+    auto EndPoint() & {return endPoint_;}
+    auto EndPoint() && {return std::move(endPoint_);}
 
 
 private:

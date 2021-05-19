@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
 
+#include <ctrl_toolbox/HelperFunctions.h>
+
 #include "sisl_toolbox/GenericCurve.hpp"
 #include "sisl_toolbox/StraightLine.hpp"
 #include "sisl_toolbox/Circle.hpp"
@@ -25,12 +27,16 @@ class Path {
 public:
     Path();
 
-    Path(std::vector<Parameters>& parameters);
+    Path(std::vector<Parameters> & parameters);
+
+    Path(std::vector<Eigen::Vector3d> & points);
+
+    Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
 
     template <typename T>
     void AddCurveBack(std::shared_ptr<T> curve);
 
-    void SavePath(int samples, std::string path);
+    void SavePath(int samples, std::string const path) const;
 
     /**
      * @brief Reverse the whole path
@@ -47,16 +53,33 @@ public:
 
     void MoveState(double offset, double& abscissa, int& curveId, Eigen::Vector3d& point);
 
-    double AlongPathDistance();
+    double AlongPathDistance() const;
+
+    std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Path> otherPath);
+
+    
 
     // Getter / Setter
-    auto Curves() {return curves_;}
-    auto CurvesNumber() {return curvesNumber_;}
-    auto Length() {return length_;}
+    auto Curves() const& {return curves_;}
+    auto Curves() & {return curves_;}
+    auto Curves() && {return std::move(curves_);}
+
+    auto CurvesNumber() const& {return curvesNumber_;}
+    auto CurvesNumber() & {return curvesNumber_;}
+    auto CurvesNumber() && {return std::move(curvesNumber_);}
+
+    auto Length() const& {return length_;}
+    auto Length() & {return length_;}
+    auto Length() && {return std::move(length_);}
     
     // Da togliere
-    auto CurrentAbscissa() {return currentAbscissa_;}
-    auto CurrentCurveId() {return currentCurveId_;}
+    auto CurrentAbscissa() const& {return currentAbscissa_;}
+    auto CurrentAbscissa() & {return currentAbscissa_;}
+    auto CurrentAbscissa() && {return std::move(currentAbscissa_);}
+
+    auto CurrentCurveId() const& {return currentCurveId_;}
+    auto CurrentCurveId() & {return currentCurveId_;}
+    auto CurrentCurveId() && {return std::move(currentCurveId_);}
 
 private:
     std::vector<std::shared_ptr<Curve>> curves_;

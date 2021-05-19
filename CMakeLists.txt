@@ -85,12 +85,15 @@ if(BUILD_TESTS)
     add_executable(test_serpentine_extractSection test/test_serpentine_extractSection.cpp)
     target_link_libraries(test_serpentine_extractSection sisl_toolbox)
 
+    add_executable(test_serpentine_generation test/test_serpentine_generation.cpp)
+    target_link_libraries(test_serpentine_generation sisl_toolbox)
+
     #add_executable(rml_test_model test/rml_test_model.cpp
     #   test/baxterLeft_armmodel.cc
     #    test/youbot_armmodel.cc
     #    test/youbot_vehiclemodel.cc)    
 
-    add_test(test_hippodrome test_serpentine test_serpentine_movePoint test_serpentine_extractSection)
+    add_test(test_hippodrome test_serpentine test_serpentine_movePoint test_serpentine_extractSection test_serpentine_generation)
 endif(BUILD_TESTS)
 
 
