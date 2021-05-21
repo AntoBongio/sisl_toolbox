@@ -57,6 +57,8 @@ public:
 
     std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Path> otherPath);
 
+    std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Path> otherPath);
+
     
 
     // Getter / Setter

@@ -41,7 +41,7 @@ bool Curve::SaveCurve(int const samples, std::string const path, std::string con
         std::array<double, 3> pos{0};
 
         for (double k = 0; k < samples; ++k) {
-            param = k / (samples - 1) * endParameter_;
+            param = startParameter_ + k / (samples - 1) * (endParameter_ - startParameter_);
             s1221(curve_, 0, param, &left, &pos[0], &status);
             
             *file << pos[0] << " " << pos[1] << " " << pos[2] << "\n";

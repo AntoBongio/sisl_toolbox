@@ -1,4 +1,5 @@
 #include "test/test_serpentine.hpp"
+#include <unordered_set>
 
 
 int main(int argc, char** argv) {   
@@ -29,8 +30,7 @@ int main(int argc, char** argv) {
     outputFile.close();
     */
 
-    double angle{30.0};
-    double offset{30.0};
+    
 
     std::vector<Eigen::Vector3d> polygonVerteces(pointLatLong.size(), Eigen::Vector3d::Zero());
     for(auto i = 0; i < polygonVerteces.size(); i++) {
@@ -38,7 +38,14 @@ int main(int argc, char** argv) {
         polygonVerteces[i][2] = 0;
     }
 
+    // Test unordered set
+
+    double angle{270.0}; // Fare test negli angoli limite
+    double offset{30.0};
+    
     auto serpentine = std::make_shared<Path>(angle, offset, polygonVerteces);
+    
+    
     //std::cout << "Length: " << std::fixed << std::setprecision(3) << serpentine->Length() << std::endl; 
     //serpentine->SavePath(120, "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 

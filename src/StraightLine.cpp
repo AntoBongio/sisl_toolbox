@@ -15,4 +15,10 @@ StraightLine::StraightLine(int type, int dimension, int order, Eigen::Vector3d s
 
         FromAbsToPos(startParameter_, startPoint_);
         FromAbsToPos(endParameter_, endPoint_);
+
+        /*
+        std::cout << "[StraightLine constructor] -> (startPoint_, startParameter_): ([" << startPoint_[0] << ", " << startPoint_[1] << ", " 
+            << startPoint_[2]  << "], " << startParameter_ << ") / (endParameter_, endPoint_): ([" << endPoint_[0] << ", " 
+            << endPoint_[1] << ", " << endPoint_[2] << "], " << endParameter_ << ")" << std::endl;
+        */
     }
