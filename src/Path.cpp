@@ -238,15 +238,28 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
         lineVertex.emplace_back(Eigen::Vector3d {closestPoint[0] + std::cos(angleRadians) * (rectangleDiagonal), closestPoint[1] + std::sin(angleRadians) * (rectangleDiagonal), closestPoint[2]});
     }
 
-    auto parallelStraightLines = std::make_shared<Path>(); // Up to now not used
-
+    auto parallelStraightLines = std::make_shared<Path>(); 
+    
     parallelStraightLines->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, lineVertex[0], lineVertex[1]));
+    auto intersectionPoints { parallelStraightLines->Intersection(0, polygon) };
+
+    /*
+    // Starting from the first line, use the unique intersection as starting point
+    std::vector<Eigen::Vector3d> tmpInterPoints {parallelStraightLines->Intersection(0, polygon)};
+    int curveCounter{ 1 };  
+
+    double dist{0};
+    */
+    auto Distance = [&](Eigen::Vector3d const& vec1, Eigen::Vector3d const& vec2) {
+        return std::sqrt(std::pow(vec1[0] - vec2[0], 2) + std::pow(vec1[1] - vec2[1], 2) + std::pow(vec1[2] - vec2[2], 2));
+    };
+    
+    auto serpentine {std::make_shared<Path>()}; 
    
     bool outOfBound {false};
 
-    int counter = 0;
+    int counter = 1;
     while(!outOfBound) {
-        ++counter;
 
         if(angle == 0.0 or angle == 180.0) {
 
@@ -285,18 +298,129 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
 
         parallelStraightLines->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, lineVertex[0], lineVertex[1]));
 
+        
         auto intersec = parallelStraightLines->Intersection(counter, polygon);
+
+
+        /// AGGIUNTO!
+        std::map<double, int> map;
+        for(int i = 0; i < intersec.size(); ++i) {
+            map.emplace(Distance(intersectionPoints.back(), intersec[i]), i);
+        }
+        for(auto it = map.begin(); it != map.end(); ++it) 
+            intersectionPoints.push_back(intersec[it->second]);
+
         if(intersec.empty()) {
             outOfBound = true;
+        }        
+
+        ++counter;
+    }
+
+    int previousIntersectionsCounter{0};
+    int intersectionsCounter {0};
+    bool notIntersections{false};
+    Eigen::Vector3d middlePoint;
+    Eigen::Vector3d axis {0, 0, 1};
+
+    auto intersec = parallelStraightLines->Intersection(0, polygon);
+    intersectionsCounter += intersec.size(); 
+
+    // Parto dalla seconda retta
+    for(int i = 1; i < parallelStraightLines->CurvesNumber() && !notIntersections; ++i) {
+
+        // calcolo intersezioni tra i-th retta e il poligono
+        auto intersec = parallelStraightLines->Intersection(i, polygon); 
+        intersectionsCounter += (intersec.size() >= 2) ? 2 : intersec.size();
+        int index {intersectionsCounter - 1};
+
+        if(i == 1) {
+            std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[0]->FindClosestPoint(intersectionPoints[1]);
+            parallelStraightLines->Curves()[0]->FromAbsToPos(abscissa, middlePoint);
+            serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[0], middlePoint));
+
+            Eigen::Vector3d centreCircle {(intersectionPoints[1][0] + middlePoint[0]) / 2, (intersectionPoints[1][1] + middlePoint[1]) / 2, (intersectionPoints[1][2] + middlePoint[2]) / 2};
+            //Eigen::Vector3d centreCircle {5, 0, 0};
+            //middlePoint = {20, 0, 0};
+            
+            std::cout << "centreCircle: [" << centreCircle[0] << ", " << centreCircle[1] 
+                << ", " << centreCircle[2] << "], middlePoint: [" << middlePoint[0] << ", " << middlePoint[1] 
+                << ", " << middlePoint[2] << "]"
+                << std::endl;
+                    //Circle(int type, int dimension, int order, double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint);
+
+            serpentine->AddCurveBack(std::make_shared<Circle>(2, 3, 3, 6.20, axis, middlePoint, centreCircle));
+            //serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, middlePoint, centreCircle));
         }
+        else if(intersec.size() >= 1) {
+            std::cout << "Inside intersec.size() >= 1, index: " << index << std::endl;
+            double abscissa { 0 };
+            
+
+
+            // Take the previous curve and evaluate the closest point w.r.t. the nearest point on the next curve (obtain the abscissa and then generate the point).
+            std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i - 1]->FindClosestPoint(intersectionPoints[index - 1]);
+            parallelStraightLines->Curves()[i - 1]->FromAbsToPos(abscissa, middlePoint);
+            std::cout << "MiddlePoint calcolato!" << std::endl;
+
+            std::cout << "intersectionPoints[index - 1]: [" << intersectionPoints[index - 1][0] << ", " << intersectionPoints[index - 1][1] 
+                << ", " << intersectionPoints[index - 1][2] << "], middlePoint: [" << middlePoint[0] << ", " << middlePoint[1] << ", " 
+                << middlePoint[2] << "]"
+                << std::endl;
+            
+            
+            /** TEST: da qui tutto aggiunto */
+
+            auto line1 = std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[index - 1 - previousIntersectionsCounter], middlePoint);
+            // Già c'è in realtà, usare quella già presente
+            auto line2 = std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[index - 1 - previousIntersectionsCounter], intersectionPoints[index - previousIntersectionsCounter]);
+            
+            if(line1->Length() >= line2->Length()) {
+                std::cout << "i: " << i << " caso line1->Length() >= line2->Length()" << std::endl;
+                serpentine->AddCurveBack(line1);
+                serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, middlePoint, intersectionPoints[index - 1]));
+            }
+            else {
+                std::cout << "i: " << i << " caso line1->Length() < line2->Length()" << std::endl;
+                serpentine->AddCurveBack(line2);
+                std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i]->FindClosestPoint(intersectionPoints[index - previousIntersectionsCounter]);
+                parallelStraightLines->Curves()[i]->FromAbsToPos(abscissa, middlePoint);
+                serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, 
+                    intersectionPoints[index - previousIntersectionsCounter], middlePoint));
+                
+            }
+
+            /** */
+        }
+        else {
+            serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[index - 1], intersectionPoints[index]));
+            notIntersections = true;
+        }
+
+        previousIntersectionsCounter = intersec.size();
     }
     
-
+    
     for(int i = 0; i < parallelStraightLines->curvesNumber_; ++i) {
        std::string path{"/home/antonino/Desktop/sisl_toolbox/script/line" + std::to_string(i) + ".txt"};
        parallelStraightLines->curves_[i]->SaveCurve(120, path, "write");
     }
 
+    std::cout << "intersectionPoints.size(): " << intersectionPoints.size() << std::endl;
+    try {
+        std::string const path {"/home/antonino/Desktop/sisl_toolbox/script/intersectionPoints.txt"};
+        auto file = std::make_shared<std::ofstream>(path.c_str(), std::ofstream::out);
+        
+        for(auto it = std::begin(intersectionPoints); it != std::end(intersectionPoints); ++it)
+            *file << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << "\n";
+        
+        file->close();
+
+    } catch (std::exception& e) {
+        std::cerr << "Exception thrown: " << e.what() << std::endl;
+    }
+
+    serpentine->SavePath(350, "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 
 }
 

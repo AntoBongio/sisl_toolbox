@@ -59,7 +59,6 @@ public:
 
     std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Path> otherPath);
 
-    
 
     // Getter / Setter
     auto Curves() const& {return curves_;}
@@ -91,4 +90,5 @@ private:
     int currentCurveId_;
 
 };
+
 #endif

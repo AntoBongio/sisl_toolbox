@@ -152,3 +152,4 @@ std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCur
     return intersections;
 
 }
+
