@@ -153,3 +153,21 @@ std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCur
 
 }
 
+std::unique_ptr<std::vector<Eigen::Vector3d>> Curve::Sampling(int const samples) const
+{
+    auto curve = std::make_unique<std::vector<Eigen::Vector3d>>();
+
+    int left{0};
+    int status{0};
+    double param{0};
+    std::array<double, 3> pos{0};
+
+    for (double k = 0; k < samples; ++k) {
+        param = startParameter_ + k / (samples - 1) * (endParameter_ - startParameter_);
+        s1221(curve_, 0, param, &left, &pos[0], &status);
+        
+        curve->emplace_back(Eigen::Vector3d{pos[0], pos[1], pos[2]});
+    }
+    
+    return curve;
+}

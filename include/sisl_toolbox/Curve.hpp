@@ -105,6 +105,8 @@ public:
 
     std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
 
+    std::unique_ptr<std::vector<Eigen::Vector3d>> Sampling(int const samples) const;
+
 
     // Getter / Setter
     auto Dimension() const& {return dimension_;}

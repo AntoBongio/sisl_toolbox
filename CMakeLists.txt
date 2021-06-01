@@ -26,6 +26,7 @@ add_library(sisl_toolbox SHARED
     src/StraightLine.cpp
     src/Circle.cpp
     src/Path.cpp
+    src/PersistenceManager.cpp
 )
 
 

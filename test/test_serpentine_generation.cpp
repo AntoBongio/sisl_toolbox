@@ -40,11 +40,14 @@ int main(int argc, char** argv) {
 
     // Test unordered set
 
-    double angle{270.0}; // Fare test negli angoli limite
+    double angle{45.0}; // Fare test negli angoli limite
     double offset{30.0};
+
+    
     
     auto serpentine = std::make_shared<Path>(angle, offset, polygonVerteces);
     
+    //std::cout << "Lunghezza prima curva: " << (*serpentine)[0]->Length() << std::endl;
     
     //std::cout << "Length: " << std::fixed << std::setprecision(3) << serpentine->Length() << std::endl; 
     //serpentine->SavePath(120, "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
