@@ -1,2 +1,0 @@
-FindNear -130 0 3
-ClosestPoint -102.704 -25.8343 0

@@ -9,30 +9,30 @@ import pandas as pd
 dataPolygon = pd.read_csv('polygon.txt', sep='\s+', header=None)
 dataPolygon = pd.DataFrame(dataPolygon)
 
-xPolygon = dataPolygon[0]
-yPolygon = dataPolygon[1]
-zPolygon = dataPolygon[2]
+xPolygon = dataPolygon[1]
+yPolygon = dataPolygon[0]
+zPolygon = -dataPolygon[2]
 
 dataRectangle = pd.read_csv('rectangle.txt', sep='\s+', header=None)
 dataRectangle = pd.DataFrame(dataRectangle)
 
-xRectangle = dataRectangle[0]
-yRectangle = dataRectangle[1]
-zRectangle = dataRectangle[2]
+xRectangle = dataRectangle[1]
+yRectangle = dataRectangle[0]
+zRectangle = -dataRectangle[2]
 
 dataIntersections = pd.read_csv('startEndPoints.txt', sep='\s+', header=None)
 dataIntersections = pd.DataFrame(dataIntersections)
 
-xIntersections = dataIntersections[0]
-yIntersections = dataIntersections[1]
-zIntersections = dataIntersections[2]
+xIntersections = dataIntersections[1]
+yIntersections = dataIntersections[0]
+zIntersections = -dataIntersections[2]
 
 dataSerpentine = pd.read_csv('serpentine.txt', sep='\s+', header=None)
 dataSerpentine = pd.DataFrame(dataSerpentine)
 
-xSerpentine = dataSerpentine[0]
-ySerpentine = dataSerpentine[1]
-zSerpentine = dataSerpentine[2]
+xSerpentine = dataSerpentine[1]
+ySerpentine = dataSerpentine[0]
+zSerpentine = -dataSerpentine[2]
 
 
 import matplotlib.pyplot as plt
@@ -41,8 +41,8 @@ figure.set_figwidth(10)
 figure.set_figheight(12)
 ax = plt.axes(projection='3d')
 plt.title('Path')
-plt.xlabel("x")
-plt.ylabel("y")
+plt.xlabel("y")
+plt.ylabel("x")
 ax.set_xlim([-200, 200])
 ax.set_ylim([-200, 200])
 ax.set_zlim([-10, 10])

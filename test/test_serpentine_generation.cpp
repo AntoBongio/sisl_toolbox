@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     // Test unordered set
 
     double angle{45.0}; // Fare test negli angoli limite
-    double offset{30.0};
+    double offset{10.0};
 
     
     

@@ -21,12 +21,12 @@ option(BUILD_TESTS "Compile tests" ON)
 option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
 
 add_library(sisl_toolbox SHARED
-    src/Curve.cpp
-    src/GenericCurve.cpp
-    src/StraightLine.cpp
-    src/Circle.cpp
-    src/Path.cpp
-    src/PersistenceManager.cpp
+    src/curve.cpp
+    src/generic_curve.cpp
+    src/straight_line.cpp
+    src/circle.cpp
+    src/path.cpp
+    src/persistence_manager.cpp
 )
 
 

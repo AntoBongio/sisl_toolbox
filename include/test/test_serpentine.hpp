@@ -7,10 +7,10 @@
 #include <chrono>
 #include <iomanip>
 
-#include "sisl_toolbox/Curve.hpp"
-#include "sisl_toolbox/StraightLine.hpp"
-#include "sisl_toolbox/Circle.hpp"
-#include "sisl_toolbox/Path.hpp"
-#include "sisl_toolbox/Defines.hpp"
-#include "sisl_toolbox/PersistenceManager.hpp"
+#include "sisl_toolbox/curve.hpp"
+#include "sisl_toolbox/straight_line.hpp"
+#include "sisl_toolbox/circle.hpp"
+#include "sisl_toolbox/path.hpp"
+#include "sisl_toolbox/defines.hpp"
+#include "sisl_toolbox/persistence_manager.hpp"
 
