@@ -1,5 +1,4 @@
 #include "test/test_serpentine.hpp"
-#include <unordered_set>
 
 
 int main(int argc, char** argv) {   
@@ -46,12 +45,8 @@ int main(int argc, char** argv) {
     
     
     auto serpentine = std::make_shared<Path>(angle, offset, polygonVerteces);
-    
-    //std::cout << "Lunghezza prima curva: " << (*serpentine)[0]->Length() << std::endl;
-    
-    //std::cout << "Length: " << std::fixed << std::setprecision(3) << serpentine->Length() << std::endl; 
-    //serpentine->SavePath(120, "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 
+    PersistenceManager::SaveObj(serpentine->Sampling(350), "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 
     return 0;
 }

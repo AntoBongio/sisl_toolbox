@@ -1,7 +1,6 @@
 #include "sisl_toolbox/Path.hpp"
 
 #include <iomanip>
-#include "sisl_toolbox/PersistenceManager.hpp"
 
 
 Path::Path()
@@ -276,7 +275,7 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
             break;
     }
 
-    auto serpentine {std::make_shared<Path>()}; 
+    //auto serpentine {std::make_shared<Path>()}; 
     auto intersec = parallelStraightLines->Intersection(0, polygon);
 
     auto previousIntersectionsCounter{intersec.size()};
@@ -343,7 +342,8 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
 
             if(line1->Length() >= line2->Length()) {
                 std::cout << "Iteration: " << i << " caso line1->Length() >= line2->Length()" << std::endl;
-                serpentine->AddCurveBack(line1);
+                curves_.emplace_back(line1);
+                ++curvesNumber_;
                 //serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, middlePoint, intersectionPoints[index - 1]));
 
                 circlePoints.push_back(middlePoint);
@@ -366,10 +366,10 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
                     Eigen::Vector3d{centreCircle[0] + std::cos(angleSecondPointRad) + directionFirstToSecond[0] * 2 * offset, 
                         centreCircle[1] + std::sin(angleSecondPointRad) + directionFirstToSecond[1] * 2 * offset, 0});
 
-                auto lineIntersectSerpentine1 = lineThroughBoth->Intersection(serpentine->Curves()[serpentine->CurvesNumber() - 1]);
+                auto lineIntersectSerpentine1 = lineThroughBoth->Intersection(curves_[curvesNumber_ - 1]);
                 std::vector<Eigen::Vector3d> lineIntersectSerpentine2{};
-                if(serpentine->CurvesNumber() > 1)
-                    lineIntersectSerpentine2 = lineThroughBoth->Intersection(serpentine->Curves()[serpentine->CurvesNumber() - 2]);
+                if(curvesNumber_ > 1)
+                    lineIntersectSerpentine2 = lineThroughBoth->Intersection(curves_[curvesNumber_ - 2]);
 
                 if(!lineIntersectSerpentine1.empty() or !lineIntersectSerpentine2.empty()) {
 
@@ -386,11 +386,13 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
                 circlePoints.push_back(secondPoint);
 
                 circlePoints.push_back(intersectionPoints[index - 1]);
-                serpentine->AddCurveBack(std::make_shared<GenericCurve>(0, 3, 3, 3, knots, circlePoints, weights, coefficients));
+                curves_.emplace_back(std::make_shared<GenericCurve>(0, 3, 3, 3, knots, circlePoints, weights, coefficients));
+                ++curvesNumber_;
             }
             else {
                 std::cout << "Iteration: " << i << " caso line1->Length() < line2->Length()" << std::endl;
-                serpentine->AddCurveBack(line2);
+                curves_.emplace_back(line2);
+                ++curvesNumber_;
                 std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i]->FindClosestPoint(intersectionPoints[index - intersec.size()]);
                 parallelStraightLines->Curves()[i]->FromAbsToPos(abscissa, middlePoint);
 
@@ -416,10 +418,10 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
                         centreCircle[1] + std::sin(angleSecondPointRad) + directionFirstToSecond[1] * 2 * offset, 0});
              
 
-                auto lineIntersectSerpentine1 = lineThroughBoth->Intersection(serpentine->Curves()[serpentine->CurvesNumber() - 1]);
+                auto lineIntersectSerpentine1 = lineThroughBoth->Intersection(curves_[curvesNumber_ - 1]);
                 std::vector<Eigen::Vector3d> lineIntersectSerpentine2{};
-                if(serpentine->CurvesNumber() > 1)
-                    lineIntersectSerpentine2 = lineThroughBoth->Intersection(serpentine->Curves()[serpentine->CurvesNumber() - 2]);
+                if(curvesNumber_ > 1)
+                    lineIntersectSerpentine2 = lineThroughBoth->Intersection(curves_[curvesNumber_ - 2]);
 
                 if(!lineIntersectSerpentine1.empty() or !lineIntersectSerpentine2.empty()) {
 
@@ -436,13 +438,15 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
                 circlePoints.push_back(secondPoint);
 
                 circlePoints.push_back(middlePoint);
-                serpentine->AddCurveBack(std::make_shared<GenericCurve>(0, 3, 3, 3, knots, circlePoints, weights, coefficients));
+                curves_.emplace_back(std::make_shared<GenericCurve>(0, 3, 3, 3, knots, circlePoints, weights, coefficients));
+                ++curvesNumber_;
             }
         }
         else {
             std::cout << "Iteration: " << i << " -> Not anymore intersections!!" << std::endl;
 
-            serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[index - 1], intersectionPoints[index]));
+            curves_.emplace_back(std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[index - 1], intersectionPoints[index]));
+            ++curvesNumber_;
             noIntersections = true;
         }
 
@@ -472,11 +476,6 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
         std::cerr << "Exception thrown: " << e.what() << std::endl;
     }
 
-    
-
-    auto path = serpentine->Sampling(350);
-    PersistenceManager::SaveObj(std::move(path), "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
-    //serpentine->SavePath(350, "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 }
 
 

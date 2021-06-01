@@ -12,3 +12,5 @@
 #include "sisl_toolbox/Circle.hpp"
 #include "sisl_toolbox/Path.hpp"
 #include "sisl_toolbox/Defines.hpp"
+#include "sisl_toolbox/PersistenceManager.hpp"
+
