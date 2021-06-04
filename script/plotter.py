@@ -12,15 +12,15 @@ if len(sys.argv) > 1:
     if sys.argv[1] == "findClosest" :
         findNearProblem = pd.read_csv('closestPoint.txt', sep='\s+', header=None)
         findNearProblem = pd.DataFrame(findNearProblem)
-        findNearPoint = [findNearProblem[1][0], findNearProblem[2][0], findNearProblem[3][0]]
-        closestPoint = [findNearProblem[1][1], findNearProblem[2][1], findNearProblem[3][1]]
+        findNearPoint = [findNearProblem[2][0], findNearProblem[1][0], -findNearProblem[3][0]]
+        closestPoint = [findNearProblem[2][1], findNearProblem[1][1], -findNearProblem[3][1]]
 
     if sys.argv[1] == "movePoint" :
         movePointProblem = pd.read_csv('movePoint.txt', sep='\s+', header=None)
         movePointProblem = pd.DataFrame(movePointProblem)
         points = []
         for index in range(len(movePointProblem)):
-            points.append([movePointProblem[1][index], movePointProblem[2][index], movePointProblem[3][index], movePointProblem[0][index]])
+            points.append([movePointProblem[2][index], movePointProblem[1][index], -movePointProblem[3][index], movePointProblem[0][index]])
 
     if sys.argv[1] == "extractSection" :
         dataSection = pd.read_csv('pathSection.txt', sep='\s+', header=None)
@@ -33,12 +33,12 @@ figure.set_figwidth(10)
 figure.set_figheight(12)
 ax = plt.axes(projection='3d')
 plt.title('Path')
-plt.xlabel("x")
-plt.ylabel("y")
+plt.xlabel("y")
+plt.ylabel("x")
 
-x = data[0]
-y = data[1]
-z = data[2]
+x = data[1]
+y = data[0]
+z = -data[2]
 ax.plot3D(x, y, z, 'blue', label='Path')
 
 ax.scatter3D(x[0], y[0], z[0], 'yellow', label='Start point')

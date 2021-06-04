@@ -27,6 +27,7 @@ add_library(sisl_toolbox SHARED
     src/circle.cpp
     src/path.cpp
     src/persistence_manager.cpp
+    src/curve_factory.cpp
 )
 
 
@@ -73,21 +74,26 @@ export(TARGETS sisl_toolbox FILE sisl_toolbox_config.cmake)
 
 
 if(BUILD_TESTS)
-    # Every library has unit tests, of course
+    
     add_executable(test_hippodrome test/test_hippodrome.cpp)
     target_link_libraries(test_hippodrome sisl_toolbox)
 
-    add_executable(test_serpentine test/test_serpentine.cpp)
-    target_link_libraries(test_serpentine sisl_toolbox)
+    #add_executable(test_serpentine test/test_serpentine.cpp)
+    #target_link_libraries(test_serpentine sisl_toolbox)
 
-    add_executable(test_serpentine_movePoint test/test_serpentine_movePoint.cpp)
-    target_link_libraries(test_serpentine_movePoint sisl_toolbox)
+    #add_executable(test_serpentine_movePoint test/test_serpentine_movePoint.cpp)
+    #target_link_libraries(test_serpentine_movePoint sisl_toolbox)
 
-    add_executable(test_serpentine_extractSection test/test_serpentine_extractSection.cpp)
-    target_link_libraries(test_serpentine_extractSection sisl_toolbox)
+    #add_executable(test_serpentine_extractSection test/test_serpentine_extractSection.cpp)
+    #target_link_libraries(test_serpentine_extractSection sisl_toolbox)
 
-    add_executable(test_serpentine_generation test/test_serpentine_generation.cpp)
-    target_link_libraries(test_serpentine_generation sisl_toolbox)
+    #add_executable(test_serpentine_generation test/test_serpentine_generation.cpp)
+    #target_link_libraries(test_serpentine_generation sisl_toolbox)
+
+
+
+    #add_executable(test_curve_factory test/test_curve_factory.cpp)
+    #target_link_libraries(test_curve_factory sisl_toolbox)
 
     #add_executable(rml_test_model test/rml_test_model.cpp
     #   test/baxterLeft_armmodel.cc

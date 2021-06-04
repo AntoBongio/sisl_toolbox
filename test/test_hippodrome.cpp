@@ -16,7 +16,12 @@ int main(int argc, char** argv) {
         {3.14, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{0, 10, 0}, Eigen::Vector3d{0, 5, 0}} // Circle
     };    
 
-    auto firstPath = std::make_shared<Path>(curveDefinition1);
+
+    std::vector<Parameters> circleTest {
+        {5.94, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{30, 30, 0}, Eigen::Vector3d{15, 30, 0}}, // Circle
+    }; 
+
+    auto firstPath = std::make_shared<Path>(circleTest);
 
     auto end = std::chrono::high_resolution_clock::now();
     // Calculating total time taken by the program.
