@@ -12,5 +12,11 @@
 #include "sisl_toolbox/circle.hpp"
 #include "sisl_toolbox/path.hpp"
 #include "sisl_toolbox/defines.hpp"
+
+#include "sisl_toolbox/curve_factory.hpp"
+#include "sisl_toolbox/path_factory.hpp"
+
 #include "sisl_toolbox/persistence_manager.hpp"
+
+
 

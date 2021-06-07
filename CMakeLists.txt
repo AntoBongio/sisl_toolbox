@@ -27,7 +27,7 @@ add_library(sisl_toolbox SHARED
     src/circle.cpp
     src/path.cpp
     src/persistence_manager.cpp
-    src/curve_factory.cpp
+    src/path_factory.cpp
 )
 
 
@@ -87,8 +87,8 @@ if(BUILD_TESTS)
     #add_executable(test_serpentine_extractSection test/test_serpentine_extractSection.cpp)
     #target_link_libraries(test_serpentine_extractSection sisl_toolbox)
 
-    #add_executable(test_serpentine_generation test/test_serpentine_generation.cpp)
-    #target_link_libraries(test_serpentine_generation sisl_toolbox)
+    add_executable(test_serpentine_generation test/test_serpentine_generation.cpp)
+    target_link_libraries(test_serpentine_generation sisl_toolbox)
 
 
 

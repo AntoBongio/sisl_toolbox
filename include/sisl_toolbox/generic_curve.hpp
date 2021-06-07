@@ -25,6 +25,9 @@ public:
     GenericCurve(int type, int dimension, int order, int degree, std::vector<double> knots, std::vector<Eigen::Vector3d> points, 
         std::vector<double> weights, std::vector<double> coefficients);
 
+    GenericCurve(int degree, std::vector<double> knots, std::vector<Eigen::Vector3d> points, std::vector<double> weights, 
+        std::vector<double> coefficients, int type = 0, int dimension = 3, int order = 3);
+
     // Getter / Setter methods
     auto Degree() const& {return degree_;}
     auto Degree() & {return degree_;}

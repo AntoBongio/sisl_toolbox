@@ -44,7 +44,12 @@ int main(int argc, char** argv) {
 
     
     
-    auto serpentine = std::make_shared<Path>(angle, offset, polygonVerteces);
+    // auto serpentine = std::make_shared<Path>(angle, offset, polygonVerteces);
+
+    auto serpentine = PathFactory::NewSerpentine(angle, offset, polygonVerteces);
+
+    std::cout << "Eccomi!!!" << std::endl;
+
 
     PersistenceManager::SaveObj(serpentine->Sampling(350), "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 

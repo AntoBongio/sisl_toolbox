@@ -130,18 +130,12 @@ public:
     auto Length() const& {return length_;}
 
     auto StartPoint() const& {return startPoint_;}
-    auto StartPoint() & {return startPoint_;}
-    auto StartPoint() && {return std::move(startPoint_);}
 
     auto EndPoint() const& {return endPoint_;}
-    auto EndPoint() & {return endPoint_;}
-    auto EndPoint() && {return std::move(endPoint_);}
-
-    
 
 private:
 
-    // Setter
+    // Private Setter
     auto Dimension(int dimension) { dimension_ = dimension;}
     auto Order(int order) {order_ = order;}
     auto Epsge(double epsge) { epsge_ = epsge;}
@@ -151,6 +145,11 @@ private:
     auto StartParameter(double startParamenter) & { startParameter_ = startParamenter;}
     auto EndParameter(double endParameter) & { endParameter_ = endParameter;}
     auto Length(double length) & { length_ = length;}
+
+    auto EndPoint() & {return endPoint_;}
+    auto EndPoint() && {return std::move(endPoint_);}
+    auto StartPoint() & {return startPoint_;}
+    auto StartPoint() && {return std::move(startPoint_);}
 
     friend class CurveFactory;
 

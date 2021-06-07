@@ -10,17 +10,18 @@
 struct Parameters {
 
    // Generic Curve parameters constructor (data needed to build a curve using the newCurve() routine)
-   Parameters(int degree, std::vector<double> knots, std::vector<Eigen::Vector3d> points, std::vector<double> weights, 
+   Parameters(int type, int degree, std::vector<double> knots, std::vector<Eigen::Vector3d> points, std::vector<double> weights, 
       std::vector<double> coefficients = {}) :
-      type{GENERICCURVE}, dimension{3}, order{3}, degree{degree}, knots{knots}, points{points}, weights{weights}, coefficients{coefficients} {}   
+      type{type}, dimension{3}, order{3}, degree{degree}, knots{knots}, points{points}, weights{weights}, coefficients{coefficients} {}   
 
    // StraightLine parameters constructor
-   Parameters(Eigen::Vector3d startPoint, Eigen::Vector3d endPoint) :
-      type{STRAIGHTLINE}, dimension{3}, order{3}, startPoint{startPoint}, endPoint{endPoint} {}
+   Parameters(int type, Eigen::Vector3d startPoint, Eigen::Vector3d endPoint, int dimension = 3, int order = 3) :
+      type{type}, startPoint{startPoint}, endPoint{endPoint} , dimension{dimension}, order{order} {}
 
    // Circle parameters constructor
-   Parameters(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint) :
-      type{CIRCLE}, dimension{3}, order{3}, angle{angle}, axis{axis}, startPoint{startPoint}, centrePoint{centrePoint} {}
+   Parameters(int type, double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, 
+      int dimension = 3, int order = 3) :
+      type{type}, angle{angle}, axis{axis}, startPoint{startPoint}, centrePoint{centrePoint}, dimension{dimension}, order{order}  {}
 
    int type; // 0 -> Generic Curve generated through newCurve(), 1 -> StraightLine, 2 -> Circle
    int dimension; // GenericCurve, StraightLine, Circle

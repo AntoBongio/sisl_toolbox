@@ -2,18 +2,16 @@
 
 #include <iomanip>
 
-
+// Path vuoto
 Path::Path()
 : curvesNumber_{0} 
 , length_{0} 
 , currentAbscissa_ {0}
 , currentCurveId_{0} {}
 
+// Path basato sulle curve definite
 Path::Path(std::vector<Parameters> & parameters)
-    : curvesNumber_{0} 
-    , length_{0}
-    , currentAbscissa_ {0}
-    , currentCurveId_{0} {
+    : Path() {
 
     for(const auto& elem: parameters) {
         switch(elem.type){
@@ -33,7 +31,7 @@ Path::Path(std::vector<Parameters> & parameters)
             case 2 : // Circle
             {
                 ++curvesNumber_;
-                curves_.push_back(std::make_shared<Circle>(elem.type, elem.dimension, elem.order, elem.angle, elem.axis, elem.startPoint, elem.centrePoint));
+                //curves_.push_back(std::make_shared<Circle>(elem.type, elem.dimension, elem.order, elem.angle, elem.axis, elem.startPoint, elem.centrePoint));
                 break;
             }
         }
@@ -46,6 +44,7 @@ Path::Path(std::vector<Parameters> & parameters)
     currentAbscissa_ = curves_[0]->StartParameter();
 }
 
+// Spezzata
 Path::Path(std::vector<Eigen::Vector3d>& points)
     : curvesNumber_{0} 
     , length_{0} {
@@ -76,6 +75,7 @@ Path::Path(std::vector<Eigen::Vector3d>& points)
     //std::cout << "[Broken Line (Path)] -> CurvesNumber_: " << curvesNumber_ << ", length: " << length_ << std::endl;
 }
 
+// Serpentina
 Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces)
     : curvesNumber_{0} 
     , length_{0} {
@@ -479,15 +479,15 @@ Path::Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVer
 }
 
 
-template <typename T>
-void Path::AddCurveBack(std::shared_ptr<T> curve) {
-    curves_.push_back(curve);
-    //std::cout << "Curve length: " << curve->Length() << std::endl;
-    length_ += curve->Length();
-    ++curvesNumber_; 
-}
+// template <typename T>
+// void Path::AddCurveBack(std::shared_ptr<T> curve) {
+//     curves_.push_back(curve);
+//     //std::cout << "Curve length: " << curve->Length() << std::endl;
+//     length_ += curve->Length();
+//     ++curvesNumber_; 
+// }
 
-
+// ELIMINARE!!!
 void Path::SavePath(int samples, std::string const path) const {
 
     int singleCurveSamples{ static_cast<int>(samples / curvesNumber_) };

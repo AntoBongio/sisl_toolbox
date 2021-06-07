@@ -34,7 +34,12 @@ public:
     Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
 
     template <typename T>
-    void AddCurveBack(std::shared_ptr<T> curve);
+    void AddCurveBack(std::shared_ptr<T> curve) {
+        curves_.push_back(curve);
+        //std::cout << "Curve length: " << curve->Length() << std::endl;
+        length_ += curve->Length();
+        ++curvesNumber_; 
+    }
 
     void SavePath(int samples, std::string const path) const;
 

@@ -1,4 +1,5 @@
 #include "test/test_hippodrome.hpp"
+#include <vector>
 
 #include <iomanip>
 
@@ -9,19 +10,16 @@ int main(int argc, char** argv) {
     // unsync the I/O of C and C++.
     std::ios_base::sync_with_stdio(false);
 
-    std::vector<Parameters> curveDefinition1 {
-        {Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{10, 0, 0}}, // Line
-        {3.14, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{10, 0, 0}, Eigen::Vector3d{10, 5, 0}}, // Circle
-        {Eigen::Vector3d{10, 10, 0}, Eigen::Vector3d{0, 10, 0}}, // Line
-        {3.14, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{0, 10, 0}, Eigen::Vector3d{0, 5, 0}} // Circle
-    };    
+    std::shared_ptr<Path> firstPath;
 
-
-    std::vector<Parameters> circleTest {
-        {5.94, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{30, 30, 0}, Eigen::Vector3d{15, 30, 0}}, // Circle
-    }; 
-
-    auto firstPath = std::make_shared<Path>(circleTest);
+    try {
+        firstPath = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{10, 0, 0}, 
+                                                                            Eigen::Vector3d{10, 10, 0}, Eigen::Vector3d{0, 10, 0}});
+    }
+    catch(std::string const & exception) {
+        std::cout << "[test_hippodrome main] received exception from --> " << exception << std::endl;
+        return 0;
+    }
 
     auto end = std::chrono::high_resolution_clock::now();
     // Calculating total time taken by the program.
