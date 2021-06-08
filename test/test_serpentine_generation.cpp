@@ -14,42 +14,18 @@ int main(int argc, char** argv) {
         ctb::LatLong(44.39074299756334, 8.94435048387282)};
 
 
-    /*
-    std::vector<Eigen::Vector3d> polygon(pointLatLong.size(), Eigen::Vector3d::Zero());
-    for(auto i = 0; i < polygon.size(); i++) {
-        ctb::LatLong2LocalNED(pointLatLong[i], 0.0, centroid, polygon[i]);
-        polygon[i][2] = 0;
-    }
-
-    std::ofstream outputFile;
-    outputFile.open ("/home/antonino/Desktop/sisl_toolbox/script/polygon.txt");    
-    for(const auto & vertex: polygon) {
-        outputFile << vertex[0] << " " << vertex[1] << " " << vertex[2] << "\n";
-    }
-    outputFile.close();
-    */
-
-    
-
     std::vector<Eigen::Vector3d> polygonVerteces(pointLatLong.size(), Eigen::Vector3d::Zero());
     for(auto i = 0; i < polygonVerteces.size(); i++) {
         ctb::LatLong2LocalNED(pointLatLong[i], 0.0, centroid, polygonVerteces[i]);
         polygonVerteces[i][2] = 0;
     }
 
-    // Test unordered set
-
-    double angle{45.0}; // Fare test negli angoli limite
+    double angle{45.0}; 
     double offset{10.0};
-
-    
-    
-    // auto serpentine = std::make_shared<Path>(angle, offset, polygonVerteces);
 
     auto serpentine = PathFactory::NewSerpentine(angle, offset, polygonVerteces);
 
-    std::cout << "Eccomi!!!" << std::endl;
-
+    // auto spiral = PathFactory::NewSpiral(Eigen::Vector3d{5, 12, 0}, Eigen::Vector3d{12, 2, 0}, 1);
 
     PersistenceManager::SaveObj(serpentine->Sampling(350), "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 

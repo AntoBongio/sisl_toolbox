@@ -27,11 +27,11 @@ class Path {
 public:
     Path();
 
-    Path(std::vector<Parameters> & parameters);
+    // Path(std::vector<Parameters> & parameters);
 
-    Path(std::vector<Eigen::Vector3d> & points);
+    // Path(std::vector<Eigen::Vector3d> & points);
 
-    Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
+    // Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
 
     template <typename T>
     void AddCurveBack(std::shared_ptr<T> curve) {
@@ -41,7 +41,7 @@ public:
         ++curvesNumber_; 
     }
 
-    void SavePath(int samples, std::string const path) const;
+    // void SavePath(int samples, std::string const path) const;
 
     /**
      * @brief Reverse the whole path

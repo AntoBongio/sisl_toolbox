@@ -8,6 +8,9 @@
 #include <sisl_toolbox/curve_factory.hpp>
 #include <sisl_toolbox/path.hpp>
 
+// Momentaneamente
+#include "sisl_toolbox/persistence_manager.hpp"
+
 struct SISLCurve; /** Forward declaration */
 class Curve; /** Forward declaration */
 class Circle; /** Forward declaration */
@@ -20,10 +23,11 @@ public:
 
     static std::shared_ptr<Path> NewHippodrome(std::vector<Eigen::Vector3d> points);
     static std::shared_ptr<Path> NewPolygon(std::vector<Eigen::Vector3d> points);
+    static std::shared_ptr<Path> NewSpiral(Eigen::Vector3d centrePoint, Eigen::Vector3d startPoint, double radiusOffset);
     static std::shared_ptr<Path> NewSerpentine(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
+    
 
-private:
-
+private: 
     /** 
      * @brief Convert an angle in degrees to [0, 360.0) interval
      * 
@@ -88,6 +92,7 @@ private:
     static auto FromDegToRad (double angle) {
         return angle * M_PI / 180.0;
     };
+
 
 };
 

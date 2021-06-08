@@ -12,13 +12,13 @@ std::shared_ptr<Path> PathFactory::NewHippodrome(std::vector<Eigen::Vector3d> po
 
             std::cout << "[PathFactory] -> Building a Hippodrome" << std::endl;
 
-            hippodrome->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(1, points[0], points[1]));
+            hippodrome->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(points[0], points[1]));
 
-            hippodrome->AddCurveBack<Circle>(CurveFactory::NewCurve<Circle>(2, 3.14, Eigen::Vector3d{0, 0, 1}, points[1], (points[1] + points[2]) / 2));
+            hippodrome->AddCurveBack<Circle>(CurveFactory::NewCurve<Circle>(3.14, Eigen::Vector3d{0, 0, 1}, points[1], (points[1] + points[2]) / 2));
 
-            hippodrome->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(1, points[2], points[3]));
+            hippodrome->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(points[2], points[3]));
 
-            hippodrome->AddCurveBack<Circle>(CurveFactory::NewCurve<Circle>(2, 3.14, Eigen::Vector3d{0, 0, 1}, points[3], (points[3] + points[0]) / 2));
+            hippodrome->AddCurveBack<Circle>(CurveFactory::NewCurve<Circle>(3.14, Eigen::Vector3d{0, 0, 1}, points[3], (points[3] + points[0]) / 2));
         }
         catch(size_t const & size) {
             throw "[PathFactory] -> Wrong number of points in Hyppodrome Factory! Received a vector of size " + std::to_string(size) + ", while expecting one of size 4.";
@@ -38,9 +38,9 @@ std::shared_ptr<Path> PathFactory::NewPolygon(std::vector<Eigen::Vector3d> point
             std::cout << "[PathFactory] -> Building a Polygon" << std::endl;
 
             for(auto it = points.begin(); it != (points.end() - 1); ++it) {
-                polygon->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(1, *it, *(it + 1)));
+                polygon->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(*it, *(it + 1)));
             }
-            polygon->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(1, *(points.end() - 1), *(points.end()) ));
+            polygon->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(*(points.end() - 1), *(points.begin()) ));
         }
         catch(size_t const & size) {
             throw "[PathFactory] -> Wrong number of points in NewPolygon! Received a vector of size " + std::to_string(size) + ", while expecting one of at least size 2.";
@@ -49,21 +49,61 @@ std::shared_ptr<Path> PathFactory::NewPolygon(std::vector<Eigen::Vector3d> point
         return polygon;
     }
 
+std::shared_ptr<Path> PathFactory::NewSpiral(Eigen::Vector3d centrePoint, Eigen::Vector3d startPoint, double radiusOffset) {
+
+        std::cout << "[PathFactory] -> Building a Spiral" << std::endl;
+
+        auto spiral = std::make_shared<Path>();
+
+        double const angle{3.14};
+        double radius {Distance(centrePoint, startPoint)};
+        auto axis = Eigen::Vector3d{0, 0, 1};
+
+        auto directionCentreToStartPoint = Eigen::Vector3d(centrePoint[0] - startPoint[0], centrePoint[1] - startPoint[1], centrePoint[2] - startPoint[2]);
+        directionCentreToStartPoint /= directionCentreToStartPoint.norm();
+        directionCentreToStartPoint = -directionCentreToStartPoint;
+        spiral->AddCurveBack(CurveFactory::NewCurve<Circle>(angle, axis, startPoint, centrePoint));
+
+        while(radius - radiusOffset > 0) {
+
+            startPoint -= directionCentreToStartPoint * 2 * radius;
+            centrePoint -= directionCentreToStartPoint * radiusOffset;
+            
+            spiral->AddCurveBack(CurveFactory::NewCurve<Circle>(angle, axis, startPoint, centrePoint));
+            radius -= radiusOffset;
+            directionCentreToStartPoint = -directionCentreToStartPoint;
+        }
+
+        return spiral;
+    }
 
 std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces) {
+
+    std::cout << "[PathFactory] -> Building a Serpentine" << std::endl;
 
     auto serpentine = std::make_shared<Path>();
 
     auto polygon = PathFactory::NewPolygon(polygonVerteces);
 
+
+    /** NOTE: TOGLIERE! */
+    PersistenceManager::SaveObj(polygon->Sampling(150), "/home/antonino/Desktop/sisl_toolbox/script/polygon.txt");
+
+
     // Compute the rectangle surrounding the polygon
     double maxX{}; double minX{}; double maxY{}; double minY{};
     std::tie(maxX, minX, maxY, minY) = evalRectangleBoundingBox(polygonVerteces);
 
-    Eigen::Vector3d const rectangleCentre {maxX + minX / 2, maxY + minY / 2, 0};
+    const Eigen::Vector3d rectangleCentre {maxX + minX / 2, maxY + minY / 2, 0};
     std::vector<Eigen::Vector3d> rectangleVertices{Eigen::Vector3d{maxX, maxY, 0}, Eigen::Vector3d{maxX, minY, 0},
                                                    Eigen::Vector3d{minX, minY, 0}, Eigen::Vector3d{minX, maxY, 0}};
     auto rectangle = PathFactory::NewPolygon(rectangleVertices);
+
+
+    /** NOTE: TOGLIERE! */
+    PersistenceManager::SaveObj(rectangle->Sampling(150), "/home/antonino/Desktop/sisl_toolbox/script/rectangle.txt");
+
+
 
     // Transform the angle in the interval [0, 360]
     angle = convertToAngleInterval(angle);
@@ -72,7 +112,7 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
     const double rectangleDiagonal{std::sqrt(std::pow(maxX - minX, 2) + std::pow(maxY - minY, 2))}; // Eval lenght of the rectangle diagonal
 
     // Angle in radians
-    const double angleRadians {FromDegToRad(angle)};
+    const double angleRadians {angle * M_PI / 180.0};
 
 
     /** NOTE: Computation of the Starting Point of the Serpentine */
@@ -141,8 +181,6 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
             closestPoint = polygon->FindClosestPoint(vertex, curveId, abscissa);
     }
 
-    std::cout << "[Serpentine Constructor (Path)] -> ClosestPoint: [" << closestPoint[0] << ", " << closestPoint[1] << ", " << closestPoint[2] << "]" << std::endl;
-
     // Evalute m, q, delta_q for the set of parallel lines. Consider special cases.
     double m, q, delta_q;
     std::vector<Eigen::Vector3d> lineVertex;
@@ -187,7 +225,7 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
     auto parallelStraightLines = std::make_shared<Path>(); 
 
     // Add the first line from which all the others will be computed
-    parallelStraightLines->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(1, lineVertex[0], lineVertex[1]));
+    parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(lineVertex[0], lineVertex[1]));
 
     auto intersectionPoints { parallelStraightLines->Intersection(0, polygon) };
     intersectionPoints.clear();
@@ -207,25 +245,29 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
         if(angle == 0.0 or angle == 180.0) {
             q = angle == 0 ? (q + offset) : (q - offset);
 
-            parallelStraightLines->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(1, Eigen::Vector3d{minX - rectangleBase, q, 0} ,
+            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(
+                Eigen::Vector3d{minX - rectangleBase, q, 0} ,
                 Eigen::Vector3d{maxX + rectangleBase, q, 0}));
         }
         else if (angle == 90.0){
             q += offset;
 
-            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(1, Eigen::Vector3d{maxX - q, minY - rectangleHeight, 0} ,
+            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(
+                Eigen::Vector3d{maxX - q, minY - rectangleHeight, 0} ,
                 Eigen::Vector3d{maxX - q, maxY + rectangleHeight, 0}));
         } 
         else if(angle == 270.0) {
             q += offset;
 
-            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(1, Eigen::Vector3d{minX + q, minY - rectangleHeight, 0} ,
+            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(
+                Eigen::Vector3d{minX + q, minY - rectangleHeight, 0} ,
                 Eigen::Vector3d{minX + q, maxY + rectangleHeight, 0}));
         }
         else {
             q += delta_q;
 
-            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(1, Eigen::Vector3d{(minY - 50.0 - q) / m, minY - 50.0, 0} ,
+            parallelStraightLines->AddCurveBack(CurveFactory::NewCurve<StraightLine>(
+                Eigen::Vector3d{(minY - 50.0 - q) / m, minY - 50.0, 0} ,
                 Eigen::Vector3d{(maxY + 50.0 - q) / m, maxY + 50.0, 0}));
         }
 
@@ -243,7 +285,6 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
             break;
     }
 
-    //auto serpentine {std::make_shared<Path>()}; 
     auto intersec = parallelStraightLines->Intersection(0, polygon);
 
     auto previousIntersectionsCounter{intersec.size()};
@@ -280,38 +321,38 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
         auto index {intersectionsCounter - 1};
 
         if(intersec.size() >= 1) {
-            std::cout << "Iteration: " << i << " -> Case intersec.size() >= 1" << std::endl;
+            // std::cout << "Iteration: " << i << " -> Case intersec.size() >= 1" << std::endl;
 
             double abscissa { 0 };
             // Take the previous curve and evaluate the closest point w.r.t. the nearest point on the next curve (obtain the abscissa and then generate the point).
             std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i - 1]->FindClosestPoint(intersectionPoints[index - intersec.size() + 1]);
             parallelStraightLines->Curves()[i - 1]->FromAbsToPos(abscissa, middlePoint);
 
-            std::cout << "intersectionPoints[index - intersec.size() + 1]: [" << intersectionPoints[index - intersec.size() + 1][0] << ", " 
-                << intersectionPoints[index - intersec.size() + 1][1] << ", " << intersectionPoints[index - intersec.size() + 1][2] 
-                << "], middlePoint: [" << middlePoint[0] << ", " << middlePoint[1] << ", " << middlePoint[2] << "]"
-                << std::endl;            
+            // std::cout << "intersectionPoints[index - intersec.size() + 1]: [" << intersectionPoints[index - intersec.size() + 1][0] << ", " 
+            //     << intersectionPoints[index - intersec.size() + 1][1] << ", " << intersectionPoints[index - intersec.size() + 1][2] 
+            //     << "], middlePoint: [" << middlePoint[0] << ", " << middlePoint[1] << ", " << middlePoint[2] << "]"
+            //     << std::endl;            
             
             std::shared_ptr<StraightLine> line1;
             std::shared_ptr<StraightLine> line2;
 
-            if(previousIntersectionsCounter == 1) {
-                line1 = CurveFactory::NewCurve<StraightLine>(1, intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
+            line1 = CurveFactory::NewCurve<StraightLine>(intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
                     middlePoint);
-                line2 = CurveFactory::NewCurve<StraightLine>(1, intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
+
+            if(previousIntersectionsCounter == 1) {
+                line2 = CurveFactory::NewCurve<StraightLine>(intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
                     intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1]);
             }
             else {
-                line1 = CurveFactory::NewCurve<StraightLine>(1, intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
-                    middlePoint);
-                line2 = CurveFactory::NewCurve<StraightLine>(1, intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
+                line2 = CurveFactory::NewCurve<StraightLine>(intersectionPoints[index - intersec.size() - previousIntersectionsCounter + 1], 
                     intersectionPoints[index - intersec.size()]);
             }
 
             if(line1->Length() >= line2->Length()) {
-                std::cout << "Iteration: " << i << " caso line1->Length() >= line2->Length()" << std::endl;
-
+                // std::cout << "Iteration: " << i << " caso line1->Length() >= line2->Length()" << std::endl;
                 serpentine->AddCurveBack(line1);
+
+                double angleTest{3.14};
 
                 circlePoints.push_back(middlePoint);
 
@@ -327,7 +368,7 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
 
                 auto directionFirstToSecond = Eigen::Vector3d(firstPoint[0] - secondPoint[0], firstPoint[1] - secondPoint[1], 0);
                 directionFirstToSecond /= directionFirstToSecond.norm();
-                auto lineThroughBoth =  std::make_shared<StraightLine>(1, 3, 3, 
+                auto lineThroughBoth =  CurveFactory::NewCurve<StraightLine>(
                     Eigen::Vector3d{centreCircle[0] + std::cos(angleFirstPointRad) - directionFirstToSecond[0] * 2 * offset,
                         centreCircle[1] + std::sin(angleFirstPointRad) - directionFirstToSecond[1] * 2 * offset, 0},
                     Eigen::Vector3d{centreCircle[0] + std::cos(angleSecondPointRad) + directionFirstToSecond[0] * 2 * offset, 
@@ -340,32 +381,37 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
 
                 if(!lineIntersectSerpentine1.empty() or !lineIntersectSerpentine2.empty()) {
 
-                    std::cout << "Caso -> Inverti arco di circonferenza" << std::endl;
+                    angleTest = - angleTest;
 
-                    firstPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
-                    firstPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
+                    // std::cout << "Caso -> Inverti arco di circonferenza" << std::endl;
 
-                    secondPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
-                    secondPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
+                    // firstPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
+                    // firstPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
+
+                    // secondPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
+                    // secondPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
                 }
 
-                circlePoints.push_back(firstPoint);
-                circlePoints.push_back(secondPoint);
+                // circlePoints.push_back(firstPoint);
+                // circlePoints.push_back(secondPoint);
 
-                circlePoints.push_back(intersectionPoints[index - 1]);
+                // circlePoints.push_back(intersectionPoints[index - 1]);
 
-                serpentine->AddCurveBack(CurveFactory::NewCurve<GenericCurve>(0, 3, knots, circlePoints, weights, coefficients));
+                serpentine->AddCurveBack(CurveFactory::NewCurve<Circle>(angleTest, Eigen::Vector3d{0, 0, 1}, middlePoint, centreCircle));
+
+                //serpentine->AddCurveBack(CurveFactory::NewCurve<GenericCurve>(3, knots, circlePoints, weights, coefficients));
 
             }
             else {
-                std::cout << "Iteration: " << i << " caso line1->Length() < line2->Length()" << std::endl;
-                
+                // std::cout << "Iteration: " << i << " caso line1->Length() < line2->Length()" << std::endl;
+
                 serpentine->AddCurveBack(line2);
+
+                double angleTest {3.14};
 
                 std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i]->FindClosestPoint(intersectionPoints[index - intersec.size()]);
                 parallelStraightLines->Curves()[i]->FromAbsToPos(abscissa, middlePoint);
 
-                //serpentine->AddCurveBack(std::make_shared<StraightLine>(1, 3, 3, intersectionPoints[index - intersec.size()], middlePoint));
                 circlePoints.push_back(intersectionPoints[index - intersec.size()]);
 
                 // Do things
@@ -380,7 +426,7 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
 
                 auto directionFirstToSecond = Eigen::Vector3d(firstPoint[0] - secondPoint[0], firstPoint[1] - secondPoint[1], 0);
                 directionFirstToSecond /= directionFirstToSecond.norm();
-                auto lineThroughBoth =  std::make_shared<StraightLine>(1, 3, 3, 
+                auto lineThroughBoth =  CurveFactory::NewCurve<StraightLine>(
                     Eigen::Vector3d{centreCircle[0] + std::cos(angleFirstPointRad) - directionFirstToSecond[0] * 2 * offset,
                         centreCircle[1] + std::sin(angleFirstPointRad) - directionFirstToSecond[1] * 2 * offset, 0},
                     Eigen::Vector3d{centreCircle[0] + std::cos(angleSecondPointRad) + directionFirstToSecond[0] * 2 * offset, 
@@ -394,34 +440,40 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
 
                 if(!lineIntersectSerpentine1.empty() or !lineIntersectSerpentine2.empty()) {
 
-                    std::cout << "Caso -> Inverti arco di circonferenza" << std::endl;
+                    angleTest = - angleTest;
 
-                    firstPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
-                    firstPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
+                    // std::cout << "Caso -> Inverti arco di circonferenza" << std::endl;
 
-                    secondPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
-                    secondPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
+                    // firstPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
+                    // firstPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 60.0 - 90.0) * M_PI / 180.0);
+
+                    // secondPoint[0] = centreCircle[0] + offset * std::cos(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
+                    // secondPoint[1] = centreCircle[1] + offset * std::sin(convertToAngleInterval(angle - 120.0 - 90.0) * M_PI / 180.0);
                 }
 
-                circlePoints.push_back(firstPoint);
-                circlePoints.push_back(secondPoint);
+                // circlePoints.push_back(firstPoint);
+                // circlePoints.push_back(secondPoint);
 
-                circlePoints.push_back(middlePoint);
-                serpentine->AddCurveBack(CurveFactory::NewCurve<GenericCurve>(0, 3, knots, circlePoints, weights, coefficients));
+                // circlePoints.push_back(middlePoint);
+
+                serpentine->AddCurveBack(CurveFactory::NewCurve<Circle>(angleTest, Eigen::Vector3d{0, 0, 1}, intersectionPoints[index - intersec.size()], centreCircle));
+
+                //serpentine->AddCurveBack(CurveFactory::NewCurve<GenericCurve>(3, knots, circlePoints, weights, coefficients));
+
             }
         }
         else {
-            std::cout << "Iteration: " << i << " -> Not anymore intersections!!" << std::endl;
+            // std::cout << "Iteration: " << i << " -> Not anymore intersections!!" << std::endl;
 
-            serpentine->AddCurveBack(CurveFactory::NewCurve<StraightLine>(1, intersectionPoints[index - 1], intersectionPoints[index]));
+            serpentine->AddCurveBack(CurveFactory::NewCurve<StraightLine>(intersectionPoints[index - 1], intersectionPoints[index]));
             noIntersections = true;
         }
 
         circlePoints.clear();
         previousIntersectionsCounter = intersec.size();
     }
-
-
+    
+    
     try {
         std::string const path {"/home/antonino/Desktop/sisl_toolbox/script/startEndPoints.txt"};
         auto file = std::make_shared<std::ofstream>(path.c_str(), std::ofstream::out);
