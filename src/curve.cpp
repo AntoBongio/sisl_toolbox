@@ -18,46 +18,14 @@ Curve::Curve(int type, SISLCurve *curve, int dimension, int order)
 
     }
 
-
 Curve::Curve(int dimension, int order, int type) 
     : dimension_{dimension}
     , order_{order}
     , type_{type}
+    , length_{0}
     , epsge_{0.000001} {}
 
 
-// DA ELIMINARE!!!!
-bool Curve::SaveCurve(int const samples, std::string const path, std::string const mode) const
-{
-    try {
-        std::shared_ptr<std::ofstream> file;
-
-        if(mode == "write")
-            file = std::make_shared<std::ofstream>(path.c_str(), std::ofstream::out);
-        else if(mode == "append")
-            file = std::make_shared<std::ofstream>(path.c_str(), std::ofstream::app);
-        if (!(*file))
-            throw std::runtime_error("Unable to open Output file: " + path);
-
-        int left{0};
-        int status{0};
-        double param{0};
-        std::array<double, 3> pos{0};
-
-        for (double k = 0; k < samples; ++k) {
-            param = startParameter_ + k / (samples - 1) * (endParameter_ - startParameter_);
-            s1221(curve_, 0, param, &left, &pos[0], &status);
-            
-            *file << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
-        }
-        
-        file->close();
-
-    } catch (std::exception& e) {
-        std::cerr << "Exception thrown: " << e.what() << std::endl;
-        return -1;
-    }
-}
 
 void Curve::FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position)
 {
@@ -84,8 +52,6 @@ std::shared_ptr<Curve> Curve::ExtractCurveSection(double startValue, double endV
     } 
     SISLCurve* curveSection;
     s1712(curve_, startValue, endValue, &curveSection, &statusFlag_);
-
-    //std::cout << "beyondUpperLimit: " << beyondUpperLimit << std::endl;
 
     auto curvePtr = Curve(type_, curveSection);
     return std::make_shared<Curve>(curvePtr);
@@ -134,11 +100,8 @@ std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCur
     s1857(curve_, otherCurve->CurvePtr(), epsco, epsge_, &intersectionsNum, &intersectionsFirstCurve, &intersectionsSecondCurve, 
         &numintcu, &intcurve, &statusFlag_);
 
-    //std::cout << "intersectionsNum: " << intersectionsNum << ", numintcu: " << numintcu << std::endl;
-
     std::vector<Eigen::Vector3d> intersections{};
     Eigen::Vector3d intersectionPoint;
-
 
     for(auto i = 0; i < intersectionsNum; ++i) {
         FromAbsToPos(intersectionsFirstCurve[i], intersectionPoint);
@@ -152,9 +115,7 @@ std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCur
         }
     }
 
-
     return intersections;
-
 }
 
 std::shared_ptr<std::vector<Eigen::Vector3d>> Curve::Sampling(int const samples) const
@@ -174,4 +135,35 @@ std::shared_ptr<std::vector<Eigen::Vector3d>> Curve::Sampling(int const samples)
     }
     
     return curve;
+}
+
+
+/** NEW: */
+double Curve::SislAbscissaToMeterAbscissa(double const abscissa) 
+{
+    double abscissa_m{0};
+
+    if(abscissa < startParameter_)
+        abscissa_m = startParameter_ * (length_ / endParameter_);
+    else if(abscissa > endParameter_)
+        abscissa_m = endParameter_ * (length_ / endParameter_);
+    else
+        abscissa_m = abscissa * (length_ / endParameter_);
+ 
+    return abscissa_m;
+}
+
+/** NEW: */
+double Curve::MeterAbscissaToSislAbscissa(double const abscissa_m) 
+{
+    double abscissa{0};
+
+    if(abscissa < 0)
+        abscissa = startParameter_;
+    else if(abscissa > length_)
+        abscissa = endParameter_;
+    else
+        abscissa = abscissa_m * (endParameter_ / length_ );
+ 
+    return abscissa;
 }

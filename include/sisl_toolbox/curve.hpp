@@ -41,14 +41,14 @@ public:
      */ 
     Curve(int type, SISLCurve * curve, int dimension = 3, int order = 3);
 
-    /**
-    * @brief Save the curve in a file provided by the path.
-    * @param[in] samples Number of points to describe the curve.
-    * @param[in] path Path pointing to the saving location. Remember to add the file name at the end.
-    * e.g.: "/home/antonino/Desktop/curve.txt".
-    * @param[in] mode To select "write" or "append" mode.
-    */
-    bool SaveCurve(int const samples, std::string const path, std::string const mode) const; // DA ELIMINARE!!!!
+    // /**
+    // * @brief Save the curve in a file provided by the path.
+    // * @param[in] samples Number of points to describe the curve.
+    // * @param[in] path Path pointing to the saving location. Remember to add the file name at the end.
+    // * e.g.: "/home/antonino/Desktop/curve.txt".
+    // * @param[in] mode To select "write" or "append" mode.
+    // */
+    // bool SaveCurve(int const samples, std::string const path, std::string const mode) const; // DA ELIMINARE!!!!
 
     /**
     * @brief Compute the position and the right-hand derivatives of a curve at a given parameter value.
@@ -108,6 +108,10 @@ public:
     std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
 
     std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int const samples) const;
+
+
+    double SislAbscissaToMeterAbscissa(double const abscissa);
+    double MeterAbscissaToSislAbscissa(double const abscissa_m); 
 
 
     // Getter / Setter

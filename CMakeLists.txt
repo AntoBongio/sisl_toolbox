@@ -78,11 +78,8 @@ if(BUILD_TESTS)
     add_executable(test_hippodrome test/test_hippodrome.cpp)
     target_link_libraries(test_hippodrome sisl_toolbox)
 
-    #add_executable(test_serpentine test/test_serpentine.cpp)
-    #target_link_libraries(test_serpentine sisl_toolbox)
-
-    #add_executable(test_serpentine_movePoint test/test_serpentine_movePoint.cpp)
-    #target_link_libraries(test_serpentine_movePoint sisl_toolbox)
+    add_executable(test_serpentine_movePoint test/test_serpentine_movePoint.cpp)
+    target_link_libraries(test_serpentine_movePoint sisl_toolbox)
 
     #add_executable(test_serpentine_extractSection test/test_serpentine_extractSection.cpp)
     #target_link_libraries(test_serpentine_extractSection sisl_toolbox)
@@ -91,25 +88,5 @@ if(BUILD_TESTS)
     target_link_libraries(test_serpentine_generation sisl_toolbox)
 
 
-
-    #add_executable(test_curve_factory test/test_curve_factory.cpp)
-    #target_link_libraries(test_curve_factory sisl_toolbox)
-
-    #add_executable(rml_test_model test/rml_test_model.cpp
-    #   test/baxterLeft_armmodel.cc
-    #    test/youbot_armmodel.cc
-    #    test/youbot_vehiclemodel.cc)    
-
     add_test(test_hippodrome test_serpentine test_serpentine_movePoint test_serpentine_extractSection test_serpentine_generation)
 endif(BUILD_TESTS)
-
-
-#if(BUILD_TESTS_DEVEL)
-#    add_executable(frameTest test/frameidentificationtest.cpp
-#                             test/youbot_armmodel.cc
-#                             test/twolinks_armmodel.cc)
-#
-#    target_link_libraries(frameTest rml)
-#
-#    add_test(rml_test frame_test)
-#endif(BUILD_TESTS_DEVEL)
