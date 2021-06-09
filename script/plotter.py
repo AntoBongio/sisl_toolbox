@@ -58,9 +58,9 @@ if len(sys.argv) > 1:
             ax.legend()
 
     if sys.argv[1] == "extractSection" :
-        xSection = dataSection[0]
-        ySection = dataSection[1]
-        zSection = dataSection[2]
+        xSection = dataSection[1]
+        ySection = dataSection[0]
+        zSection = -dataSection[2]
         ax.plot3D(xSection, ySection, zSection, 'red', label='Path section')
         ax.scatter3D(xSection[0], ySection[0], zSection[0], 'red', label='Section start point')
         ax.scatter3D(xSection.iloc[-1], ySection.iloc[-1], zSection.iloc[-1], 'red', label='Section last point')

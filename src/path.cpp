@@ -2,13 +2,6 @@
 
 #include <iomanip>
 
-// Path vuoto
-Path::Path()
-: curvesNumber_{0} 
-, length_{0} 
-, currentAbscissa_ {0}
-, currentCurveId_{0} {}
-
 // // Path basato sulle curve definite
 // Path::Path(std::vector<Parameters> & parameters)
 //     : Path() {
@@ -41,7 +34,7 @@ Path::Path()
 //         length_ += curve->Length();
 //     }
 
-//     currentAbscissa_ = curves_[0]->StartParameter();
+//     currentAbscissa_ = curves_[0]->StartParameter_s();
 // }
 
 // // Spezzata
@@ -502,6 +495,15 @@ Path::Path()
 //     }
 // }
 
+// Path vuoto
+Path::Path()
+: curvesNumber_{0} 
+, length_{0} 
+, startParameter_m_{0}
+, endParameter_m_{0}
+, currentAbscissa_ {0} // TOGLIERE
+, currentCurveId_{0} {} // TOGLIERE
+
 void Path::Reverse() {
 
     for(auto& elem: curves_)
@@ -509,36 +511,172 @@ void Path::Reverse() {
     std::reverse(curves_.begin(), curves_.end());
 }
 
-Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& curveId, double& abscissa) {
+Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& curveId, double& abscissa_m) {
 
     Eigen::Vector3d closestPoint{Eigen::Vector3d::Zero()};
     double distance{0};
     double minDistance{0};
-    double abscissaTmp{0};
+    double abscissaTmp_m{0};
 
     int count = 1;
     for(auto i = 0; i < curves_.size(); ++i) {
-        std::tie(abscissaTmp, distance) = curves_[i]->FindClosestPoint(worldF_position);
+        std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
 
         if(minDistance > 0 and distance < minDistance) {
             minDistance = distance;
             curveId = i;
-            abscissa = abscissaTmp;
+            abscissa_m = abscissaTmp_m;
         }
         else if (minDistance == 0){
             minDistance = distance;
             curveId = i;
-            abscissa = abscissaTmp;
+            abscissa_m = abscissaTmp_m;
         }
     }
-    curves_[curveId]->FromAbsToPos(abscissa, closestPoint);
+    curves_[curveId]->FromAbsMetersToPos(abscissa_m, closestPoint);
 
     return closestPoint;
 }
 
+std::tuple<double, int, overBound> Path::PathAbsToCurveAbs(double abscissa_m) {
+
+    overBound overBound{};
+    double abscissaCurve_m{};
+    int curveId{0};
+
+    if(abscissa_m < startParameter_m_) {
+        std::cout << "[Path::PathAbsToCurveAbs] -> Entrato in abscissa_m < startParameter_m_" << std::endl;
+        overBound.setLower(abscissa_m, startParameter_m_);
+        curveId = 0;
+        abscissaCurve_m = curves_[curveId]->StartParameter_m();
+    }
+    else if(abscissa_m > endParameter_m_) {
+        std::cout << "[Path::PathAbsToCurveAbs] -> Entrato in abscissa_m > endParameter_m_" << std::endl;
+        overBound.setUpper(abscissa_m, endParameter_m_);
+        curveId = curvesNumber_ - 1;
+        abscissaCurve_m = curves_[curveId]->EndParameter_m();
+    }
+    else {
+        std::cout << "[Path::PathAbsToCurveAbs] -> Entrato in else" << std::endl;
+        while(abscissa_m > 0) {
+            if(abscissa_m > curves_[curveId]->EndParameter_m()) {
+                abscissa_m -= curves_[curveId]->EndParameter_m();
+                ++curveId;
+            }
+            else {
+                abscissaCurve_m = abscissa_m;
+                abscissa_m = 0;
+            }
+        }
+    }
+    return std::make_tuple(abscissaCurve_m, curveId, overBound);
+}
+
+// Se abscissaCurve_m è oltre l'abscissa_m della curva, restituire la abscissa del path nella curva successiva o il limite di questa?
+// Implemento il caso che restituisco il limite di questa
+std::tuple<double, overBound> Path::CurveAbsToPathAbs(double abscissaCurve_m, int curveId) {
+
+    overBound overBound{};
+    double abscissa_m{};
+    if(curveId < 0 or curveId > (curvesNumber_ - 1)) {
+        std::cout << "CurveId error!!!" << std::endl;
+        return std::make_tuple(abscissa_m, overBound);
+    }
+
+    if(abscissaCurve_m < curves_[curveId]->StartParameter_m()) {
+        std::cout << "[Path::CurveAbsToPathAbs] -> Entrato in abscissaCurve_m < curves_[curveId]->StartParameter_m()" << std::endl;
+        overBound.setLower(abscissaCurve_m, curves_[curveId]->StartParameter_m());
+        abscissa_m = 0;
+    }
+    else if (abscissaCurve_m > curves_[curveId]->EndParameter_m()) {
+        std::cout << "[Path::CurveAbsToPathAbs] -> Entrato in abscissaCurve_m > curves_[curveId]->EndParameter_m()" << std::endl;
+        overBound.setUpper(abscissaCurve_m, curves_[curveId]->EndParameter_m());
+        abscissa_m = endParameter_m_;
+    }
+    else {
+
+    }
+    
+    return std::make_tuple(abscissa_m, overBound);
+
+    // if(abscissa_m < startParameter_m_) {
+    //     std::cout << "[Path::PathAbsToCurveAbs] -> Entrato in abscissa_m < startParameter_m_" << std::endl;
+    //     overBound.setLower(abscissa_m, startParameter_m_);
+    //     curveId = 0;
+    //     abscissaCurve_m = curves_[curveId]->StartParameter_m();
+    // }
+    // else if(abscissa_m > endParameter_m_) {
+    //     std::cout << "[Path::PathAbsToCurveAbs] -> Entrato in abscissa_m > endParameter_m_" << std::endl;
+    //     overBound.setUpper(abscissa_m, endParameter_m_);
+    //     curveId = curvesNumber_ - 1;
+    //     abscissaCurve_m = curves_[curveId]->EndParameter_m();
+    // }
+    // else {
+    //     std::cout << "[Path::PathAbsToCurveAbs] -> Entrato in else" << std::endl;
+    //     while(abscissa_m > 0) {
+    //         if(abscissa_m > curves_[curveId]->EndParameter_m()) {
+    //             abscissa_m -= curves_[curveId]->EndParameter_m();
+    //             ++curveId;
+    //         }
+    //         else {
+    //             abscissaCurve_m = abscissa_m;
+    //             abscissa_m = 0;
+    //         }
+    //     }
+    // }
+    // return std::make_tuple(abscissaCurve_m, curveId, overBound);
+}
+
+
+void Path::MoveState(double offset, double& abscissa, int& curveId, Eigen::Vector3d& point) {
+    
+    double currentMetersPosition {curves_[curveId]->AlongCurveDistance(abscissa)};
+
+    while(offset != 0) {
+
+        if(currentMetersPosition + offset > curves_[curveId]->Length()){
+
+            if(curveId + 1 == curvesNumber_) {
+                abscissa = curves_[curveId]->EndParameter_s();
+                curves_[curveId]->FromAbsToPos(abscissa, point);
+                offset = 0;
+            }
+            else {
+                offset -= (curves_[curveId]->Length() - currentMetersPosition);
+                ++curveId;
+                abscissa = curves_[curveId]->StartParameter_s();
+                currentMetersPosition = curves_[curveId]->AlongCurveDistance(abscissa);
+            }
+        }
+        else if (currentMetersPosition + offset < 0) {
+   
+            if(curveId == 0) {
+                abscissa = curves_[curveId]->StartParameter_s();
+                curves_[curveId]->FromAbsToPos(abscissa, point);
+                offset = 0;
+            }
+            else {
+                offset += currentMetersPosition;
+                --curveId;
+                abscissa = curves_[curveId]->EndParameter_s();
+                currentMetersPosition = curves_[curveId]->AlongCurveDistance(abscissa);
+            }
+        }
+        else {
+
+            abscissa += offset * curves_[curveId]->EndParameter_s() / curves_[curveId]->Length(); 
+            offset = 0;
+            curves_[curveId]->FromAbsToPos(abscissa, point);
+        }
+    }
+}
+
+
+
 
 void Path::ExtractSection(double offset, double abscissa, int curveId, std::shared_ptr<Path>& pathPortion) {
     Eigen::Vector3d point{Eigen::Vector3d::Zero()};
+
     MoveState(-offset, abscissa, curveId, point);
 
     pathPortion = std::make_shared<Path>();
@@ -549,7 +687,7 @@ void Path::ExtractSection(double offset, double abscissa, int curveId, std::shar
         currentPosition = curves_[curveId]->AlongCurveDistance(abscissa);
 
         double tmp{0};
-        double absOffset{offset * curves_[curveId]->EndParameter() / curves_[curveId]->Length()};
+        double absOffset{offset * curves_[curveId]->EndParameter_s() / curves_[curveId]->Length()};
 
         auto curve = curves_[curveId]->ExtractCurveSection(abscissa, absOffset, tmp, offset);
         pathPortion->AddCurveBack<Curve>(curve);
@@ -559,11 +697,12 @@ void Path::ExtractSection(double offset, double abscissa, int curveId, std::shar
                 offset = 0;
             else {
                 ++curveId;
-                abscissa = curves_[curveId]->StartParameter();
+                abscissa = curves_[curveId]->StartParameter_s();
             }
         }
     }
 }
+
 
 
 void Path::ExtractSection(double offset, std::shared_ptr<Path>& pathPortion) {
@@ -582,7 +721,7 @@ void Path::ExtractSection(double offset, std::shared_ptr<Path>& pathPortion) {
         std::cout << "currentPosition: " << currentPosition << ", curves_[currentCurveId_]->Length(): " << curves_[currentCurveId_]->Length() << std::endl;
 
         double tmp{0};
-        double absOffset{offset * curves_[currentCurveId_]->EndParameter() / curves_[currentCurveId_]->Length()};
+        double absOffset{offset * curves_[currentCurveId_]->EndParameter_s() / curves_[currentCurveId_]->Length()};
 
         std::cout << "currentAbscissa_: " << currentAbscissa_ << std::endl;
 
@@ -595,7 +734,7 @@ void Path::ExtractSection(double offset, std::shared_ptr<Path>& pathPortion) {
                 offset = 0;
             else {
                 ++currentCurveId_;
-                currentAbscissa_ = curves_[currentCurveId_]->StartParameter();
+                currentAbscissa_ = curves_[currentCurveId_]->StartParameter_s();
             }
         }
     }
@@ -621,82 +760,41 @@ void Path::MoveCurrentState(double offset, Eigen::Vector3d& point) {
         if(currentMetersPosition + offset > curves_[currentCurveId_]->Length()){
 
             if(currentCurveId_ + 1 == curvesNumber_) {
-                currentAbscissa_ = curves_[currentCurveId_]->EndParameter();
+                currentAbscissa_ = curves_[currentCurveId_]->EndParameter_s();
                 curves_[currentCurveId_]->FromAbsToPos(currentAbscissa_, point);
                 offset = 0;
             }
             else {
                 offset -= (curves_[currentCurveId_]->Length() - currentMetersPosition);
                 ++currentCurveId_;
-                currentAbscissa_ = curves_[currentCurveId_]->StartParameter();
+                currentAbscissa_ = curves_[currentCurveId_]->StartParameter_s();
                 currentMetersPosition = curves_[currentCurveId_]->AlongCurveDistance(currentAbscissa_);
             }
         }
         else if (currentMetersPosition + offset < 0) {
 
             if(currentCurveId_ == 0) {
-                currentAbscissa_ = curves_[currentCurveId_]->StartParameter();
+                currentAbscissa_ = curves_[currentCurveId_]->StartParameter_s();
                 curves_[currentCurveId_]->FromAbsToPos(currentAbscissa_, point);
                 offset = 0;
             }
             else {
                 offset += currentMetersPosition;
                 --currentCurveId_;
-                currentAbscissa_ = curves_[currentCurveId_]->EndParameter();
+                currentAbscissa_ = curves_[currentCurveId_]->EndParameter_s();
                 currentMetersPosition = curves_[currentCurveId_]->AlongCurveDistance(currentAbscissa_);
             }
         }
         else {
 
-            currentAbscissa_ += offset * curves_[currentCurveId_]->EndParameter() / curves_[currentCurveId_]->Length(); 
+            currentAbscissa_ += offset * curves_[currentCurveId_]->EndParameter_s() / curves_[currentCurveId_]->Length(); 
             offset = 0;
             curves_[currentCurveId_]->FromAbsToPos(currentAbscissa_, point);
         }
     }
 }
 
-void Path::MoveState(double offset, double& abscissa, int& curveId, Eigen::Vector3d& point) {
-    
-    double currentMetersPosition {curves_[curveId]->AlongCurveDistance(abscissa)};
 
-    while(offset != 0) {
-
-        if(currentMetersPosition + offset > curves_[curveId]->Length()){
-
-            if(curveId + 1 == curvesNumber_) {
-                abscissa = curves_[curveId]->EndParameter();
-                curves_[curveId]->FromAbsToPos(abscissa, point);
-                offset = 0;
-            }
-            else {
-                offset -= (curves_[curveId]->Length() - currentMetersPosition);
-                ++curveId;
-                abscissa = curves_[curveId]->StartParameter();
-                currentMetersPosition = curves_[curveId]->AlongCurveDistance(abscissa);
-            }
-        }
-        else if (currentMetersPosition + offset < 0) {
-   
-            if(curveId == 0) {
-                abscissa = curves_[curveId]->StartParameter();
-                curves_[curveId]->FromAbsToPos(abscissa, point);
-                offset = 0;
-            }
-            else {
-                offset += currentMetersPosition;
-                --curveId;
-                abscissa = curves_[curveId]->EndParameter();
-                currentMetersPosition = curves_[curveId]->AlongCurveDistance(abscissa);
-            }
-        }
-        else {
-
-            abscissa += offset * curves_[curveId]->EndParameter() / curves_[curveId]->Length(); 
-            offset = 0;
-            curves_[curveId]->FromAbsToPos(abscissa, point);
-        }
-    }
-}
 
 std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Path> otherPath) {
 

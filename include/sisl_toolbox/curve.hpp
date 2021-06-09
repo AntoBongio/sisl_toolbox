@@ -11,13 +11,32 @@
 struct SISLCurve; /** Forward declaration */
 class CurveFactory; /** Forward declaration */
 
+struct overBound {
+
+    bool upperFlag = false;
+    double upperBound = 0;
+    bool lowerFlag = false;
+    double lowerBound = 0;
+
+    void setUpper(double abscissa_m, double endParameter_m_) {
+        upperFlag = true;
+        upperBound = abscissa_m - endParameter_m_;
+    };
+
+    void setLower(double abscissa_m, double startParameter_m_) {
+        lowerFlag = true;
+        lowerBound = startParameter_m_ - abscissa_m;
+    };
+};
+
+
 /**
- * @class Curve (virtual class)
+ * @class Curve
  *
- * @brief Interface for a curve. 
- * @details Practically speaking, the main objective of this interface is to define a wrapper for the most used SISL functions,
- * in order to enhance teir readability and avoiding the need of the manual. 
+ * @brief The main objective of this class is to define a wrapper for the most used SISL functions and to provide an in meters curve parametrization,
+ *        internally applying a conversion from meters to Sisl parametrization. 
  */
+
 class Curve {
 
 public:
@@ -40,16 +59,9 @@ public:
      * 
      */ 
     Curve(int type, SISLCurve * curve, int dimension = 3, int order = 3);
+ 
 
-    // /**
-    // * @brief Save the curve in a file provided by the path.
-    // * @param[in] samples Number of points to describe the curve.
-    // * @param[in] path Path pointing to the saving location. Remember to add the file name at the end.
-    // * e.g.: "/home/antonino/Desktop/curve.txt".
-    // * @param[in] mode To select "write" or "append" mode.
-    // */
-    // bool SaveCurve(int const samples, std::string const path, std::string const mode) const; // DA ELIMINARE!!!!
-
+    ////////////////// TOGLIERE??? ////////////////////////////
     /**
     * @brief Compute the position and the right-hand derivatives of a curve at a given parameter value.
     * @details To compute the positione and the first derivatives of a curve at a given parameter value. Evaluation from the right hand side.
@@ -57,30 +69,24 @@ public:
     * @param[out] worldF_position The point corresponding at the abscissa expressed in world frame.
     */
     void FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position);
+    //////////////////////////////////////////////
+
+
 
     /**
     * @brief Pick a part of a curve.
     * @details It extracts a new curve from the stating one according to the abscissa startValue and endValue.
-    * @param[in] startValue Start parameter value of the part curve to be picked.
-    * @param[in] endValue End parameter value of the part curve to be picked.
+    * @param[in] startValue_m Start parameter value of the part curve to be picked (in meters).
+    * @param[in] endValue_m End parameter value of the part curve to be picked (in meters).
     * @param[out] beyondLowerLimit Distance in meters beyond the upper limit of the curve
     * @param[out] beyondUpperLimit Distance in meters beyond the lower limit of the curve
     * 
     * @return A shared ptr to the curve object.
     */
-    std::shared_ptr<Curve> ExtractCurveSection(double startValue, double endValue, double& beyondLowerLimit, double& beyondUpperLimit);
+    std::shared_ptr<Curve> ExtractCurveSection(double startValue_m, double endValue_m, double& beyondLowerLimit, double& beyondUpperLimit);
     
-    /**
-    * @brief Find the closest point between a curve and a point. Simple version.
-    * @details Find the closest point between a curve and a point. The method is fast and should work well in clear cut cases but does not guarantee 
-    * finding the right solution. As long as it doesn’t fail, it will find exactly one point. In other cases, use s1953().
-    * @param[in] position The point in the closest point problem.
-    * 
-    * @return A tuple (double, double) containing as first element the abscissa of the on curve point solution of the closest point problem. 
-    * The second element is the distance between the point passed as argument (worldF_position) and the point on curve solution of the closest point problem.
-    */
-    std::tuple<double, double> FindClosestPoint(Eigen::Vector3d& worldF_position);
 
+    ////////////////// TOGLIERE??? ////////////////////////////
     /**
     * @brief Transform the abscissa value into a distance in meters from the starting point.
     * @param[in] abscissa Parameter value up to which you want to calculate the distance in meters.
@@ -88,6 +94,22 @@ public:
     * @return The along curve distance in meters from the stating point of the curve to abscissa parameter.
     */
     double AlongCurveDistance(double const abscissa);
+    //////////////////////////////////////////////
+
+
+
+    /**
+    * @brief Find the closest point between a curve and a point. Simple version.
+    * @details Find the closest point between a curve and a point. The method is fast and should work well in clear cut cases but does not guarantee 
+    * finding the right solution. As long as it doesn’t fail, it will find exactly one point. In other cases, use s1953().
+    * @param[in] position The point in the closest point problem.
+    * 
+    * @return A tuple (double, double) containing as first element the abscissa_m (in meters) of the on curve point solution of 
+    * the closest point problem. * The second element is the distance between the point passed as argument (worldF_position) 
+    * and the point on curve solution of the closest point problem.
+    */
+    std::tuple<double, double> FindClosestPoint(Eigen::Vector3d& worldF_position);
+
 
     /**
     * @brief Transform the abscissa value into a distance in meters from the starting point.
@@ -98,62 +120,102 @@ public:
     * @param[out] normal Normal component of the tangent 3D frame.
     * @param[out] binormal Binormal component of the tangent 3D frame.
     */
-    void EvalTangentFrame(double abscissa, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal);
+    void EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal);
+
+
+    /**
+    * @brief Eval intersection points between two curves.
+    * 
+    * @param[in] otherCurve The other curve w.r.t. evaluate the intersections.
+    * 
+    * @return An std::vector<Eigen::Vector3d> containing all the intersection points.
+    */
+    std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
+
+
+    /**
+    * @brief Convert an abscissa value (in Sisl) to a position in world frame.
+    * @param[in] abscissa_s Abscissa to compute the position.
+    * @param[out] worldF_position Eigen::Vector3d& containing the position.
+    */
+    void FromAbsSislToPos(double abscissa_s, Eigen::Vector3d& worldF_position);
+
+
+    /**
+    * @brief Convert an abscissa value (in meters) to a position in world frame.
+    * @param[in] abscissa_m Abscissa to compute the position.
+    * @param[out] worldF_position Eigen::Vector3d& containing the position.
+    */
+    void FromAbsMetersToPos(double abscissa_m, Eigen::Vector3d& worldF_position);
+
+
+    /**
+    * @brief Move a point on the curve of a displacement along the curve (use curve parametrization in meters).
+    * @param[in] startValueAbscissa_m Starting position (abscissa in meters) of the point.
+    * @param[in] offset_m offset (in meters) to displace the point.
+    * 
+    * @return A tuple containing respectively: the final point, the final abscissa (in meters), a struct overBound to report overBound Events.
+    */
+    std::tuple<Eigen::Vector3d, double, overBound> MovePoint(double startValueAbscissa_m, double offset_m);
+
+
+    /**
+    * @brief Convert from Sisl parametrization to Meters parametrization. 
+    *       Check if an overbound event happens (w.r.t. both extrema), meaning that the passed abscissa_s is greater than
+    *       the upper limit of the curve parametrization (the one generated automatically by the SISL routines) or is lower
+    *       than the lower one. If such Events happen, abscissa_s is truncated respectively to the endParameter_s_ or to 
+    *       startParamter_s_ and the overBound struct is filled with the exceeding quantity expressed in meters.
+    * @param[in] abscissa_s Starting position (abscissa in Sisl parametrization) of the point.
+    * 
+    * @return A tuple containing respectively: the abscissa (in meters), a struct overBound to eventually report an overBound Events.
+    */
+    std::tuple<double, overBound> SislAbsToMeterAbs(double abscissa_s);
+
+
+    /**
+    * @brief Convert from Meters parametrization to Sisl parametrization. 
+    *       Check if an overbound event happens (w.r.t. both extrema), meaning that the passed abscissa_m is greater than
+    *       the upper limit of the curve parametrization (the one derived by the automatically generated SISL parametrization
+    *       expressed in meters) or is lower than the lower one. If such Events happen, abscissa_m is truncated respectively 
+    *       to the endParameter_m_ or to startParamter_m_ and the overBound struct is filled with the exceeding quantity expressed in meters.
+    * @param[in] abscissa_m Starting position (abscissa in meters parametrization) of the point.
+    * 
+    * @return A tuple containing respectively: the abscissa (in Sisl parametrization), a struct overBound to eventually report an overBound Events.
+    */
+    std::tuple<double, overBound> MeterAbsToSislAbs(double abscissa_m); 
+
 
     /**
     * @brief Turns the direction of the orginal curve.
     */
     void Reverse();
 
-    std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
 
+    /**
+    * @brief Samples the curve. 
+    * @param[in] samples Samplesto be produces.
+    * 
+    * @return A <std::vector<Eigen::Vector3d>> containing the points.
+    */
     std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int const samples) const;
 
 
-    double SislAbscissaToMeterAbscissa(double const abscissa);
-    double MeterAbscissaToSislAbscissa(double const abscissa_m); 
-
-
-    // Getter / Setter
+    // Getters
     auto Dimension() const& {return dimension_;}
-
     auto Order() const& {return order_;}
-
     auto Epsge() const& {return epsge_;}
-
     auto Type() const& {return type_;}
-
     auto CurvePtr() const& {return curve_;}
-    
     auto StatusFlag() const& {return statusFlag_;}
-
-    auto StartParameter() const& {return startParameter_;}
-
-    auto EndParameter() const& {return endParameter_;}
-
-    auto Length() const& {return length_;}
-
+    auto StartParameter_s() const& {return startParameter_s_;}
+    auto EndParameter_s() const& {return endParameter_s_;}
+    auto StartParameter_m() const& {return startParameter_m_;}
+    auto EndParameter_m() const& {return endParameter_m_;}
+    auto Length() const& {return endParameter_m_;}
     auto StartPoint() const& {return startPoint_;}
-
     auto EndPoint() const& {return endPoint_;}
 
 private:
-
-    // Private Setter
-    auto Dimension(int dimension) { dimension_ = dimension;}
-    auto Order(int order) {order_ = order;}
-    auto Epsge(double epsge) { epsge_ = epsge;}
-    auto Type(int type) & {type_ = type;}
-    auto CurvePtr(SISLCurve* curve) & {curve_ = curve;}
-    auto StatusFlag(bool statusFlag) & {statusFlag_ = statusFlag;}
-    auto StartParameter(double startParamenter) & { startParameter_ = startParamenter;}
-    auto EndParameter(double endParameter) & { endParameter_ = endParameter;}
-    auto Length(double length) & { length_ = length;}
-
-    auto EndPoint() & {return endPoint_;}
-    auto EndPoint() && {return std::move(endPoint_);}
-    auto StartPoint() & {return startPoint_;}
-    auto StartPoint() && {return std::move(startPoint_);}
 
     friend class CurveFactory;
 
@@ -166,9 +228,10 @@ protected:
     SISLCurve *curve_;
     int statusFlag_; // Control flag used as output of each SISL function
 
-    double startParameter_; // Start value of the curve parametrization
-    double endParameter_; // Last value of the curve parametrization
-    double length_; // Length of the curve
+    double startParameter_s_; // Start value of the curve parametrization
+    double endParameter_s_; // Last value of the curve parametrization  
+    double startParameter_m_;
+    double endParameter_m_;  
     Eigen::Vector3d startPoint_; // Curve start point
     Eigen::Vector3d endPoint_; // Curve end point
 

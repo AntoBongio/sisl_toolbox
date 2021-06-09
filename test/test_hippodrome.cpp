@@ -29,8 +29,21 @@ int main(int argc, char** argv) {
 
     PersistenceManager::SaveObj(hippodrome->Sampling(100), "/home/antonino/Desktop/sisl_toolbox/script/path.txt");
 
+    std::cout << "Hippodrome->Length(): " << hippodrome->Length() << std::endl;
 
-    // Eigen::Vector3d findNearThis{8, 8, 3};
+    overBound overBound{};
+    double abscissaCurve_m{0};
+    int curveId{0};
+
+    for(int i = 0; i < hippodrome->CurvesNumber(); ++i) {
+        std::cout << "Curve " << i << " -> Length() " << hippodrome->Curves()[i]->Length() << std::endl;
+    }
+    
+    std::tie(abscissaCurve_m, curveId, overBound) = hippodrome->PathAbsToCurveAbs(45);
+
+    std::cout << "curveId: " << curveId << ", abscissaCurve_m: " << abscissaCurve_m << std::endl;
+
+    // Eigen::Vector3d findNearThis{15.5, 13, 0};
     // double abscissaClosest{0};
     // int curveIdClosest{0};
     // auto closestPoint = hippodrome->FindClosestPoint(findNearThis, curveIdClosest, abscissaClosest);

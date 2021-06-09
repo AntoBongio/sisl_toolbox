@@ -33,22 +33,57 @@ public:
 
     // Path(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
 
+    /**
+     * @brief Add a curve back
+     * 
+     * @param curve std::shared_ptr<T> with T in (StraightLine, Circle, GenericCurve). The curve to be added.
+     */
     template <typename T>
     void AddCurveBack(std::shared_ptr<T> curve) {
         curves_.push_back(curve);
-        //std::cout << "Curve length: " << curve->Length() << std::endl;
+        endParameter_m_ += curve->Length();
         length_ += curve->Length();
         ++curvesNumber_; 
     }
 
-    // void SavePath(int samples, std::string const path) const;
 
     /**
      * @brief Reverse the whole path
-     */ 
+     */
     void Reverse();
 
-    Eigen::Vector3d FindClosestPoint(Eigen::Vector3d& worldF_position, int& curveId, double& abscissa);
+    
+    /**
+     * @brief Find Closest Point w.r.t. the path
+     * 
+     * @param[in] worldF_position point in the find closest point problem.
+     * @param[out] curveId Id of the curve containing the closest point.
+     * @param[out] abscissa_m Abscissa (in meters) of the closest point on the path, it is the abscissa_m of the curve identified with curveId.
+     * 
+     * @return An Eigen::Vector3d representing the closest point.
+     */
+    Eigen::Vector3d FindClosestPoint(Eigen::Vector3d& worldF_position, int& curveId, double& abscissa_m);
+
+    /**
+     * @brief 
+     * 
+     * @param samples
+     * 
+     * @return std::shared_ptr<std::vector<Eigen::Vector3d>> containing the points.
+     */
+    std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int samples) const;
+
+    // Define [] operator
+    std::shared_ptr<Curve>& operator[](std::size_t idx) { return curves_[idx]; }
+    const std::shared_ptr<Curve>& operator[](std::size_t idx) const { return curves_[idx]; }
+
+    auto LastCurve()  {return curves_[curvesNumber_ - 1];}
+
+    std::tuple<double, int, overBound> PathAbsToCurveAbs(double abscissa_m);
+    std::tuple<double, overBound> CurveAbsToPathAbs(double abscissaCurve_m, int curveId);
+
+
+
 
     void ExtractSection(double offset, double abscissa, int curveId, std::shared_ptr<Path>& pathPortion);
 
@@ -64,13 +99,7 @@ public:
 
     std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Path> otherPath);
 
-    std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int samples) const;
-
-    // Define [] operator
-    std::shared_ptr<Curve>& operator[](std::size_t idx) { return curves_[idx]; }
-    const std::shared_ptr<Curve>& operator[](std::size_t idx) const { return curves_[idx]; }
-
-    auto LastCurve()  {return curves_[curvesNumber_ - 1];}
+    
 
     // Getter / Setter
     auto Curves() const& {return curves_;}
@@ -132,6 +161,9 @@ private:
     std::vector<std::shared_ptr<Curve>> curves_;
     int curvesNumber_;
     double length_;
+    double startParameter_m_;
+    double endParameter_m_;
+
     double currentAbscissa_;
     int currentCurveId_;
 
