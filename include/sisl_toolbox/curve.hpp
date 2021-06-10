@@ -7,28 +7,10 @@
 #include <vector>
 
 #include <eigen3/Eigen/Dense>
+#include "sisl_toolbox/defines.hpp"
 
 struct SISLCurve; /** Forward declaration */
 class CurveFactory; /** Forward declaration */
-
-struct overBound {
-
-    bool upperFlag = false;
-    double upperBound = 0;
-    bool lowerFlag = false;
-    double lowerBound = 0;
-
-    void setUpper(double abscissa_m, double endParameter_m_) {
-        upperFlag = true;
-        upperBound = abscissa_m - endParameter_m_;
-    };
-
-    void setLower(double abscissa_m, double startParameter_m_) {
-        lowerFlag = true;
-        lowerBound = startParameter_m_ - abscissa_m;
-    };
-};
-
 
 /**
  * @class Curve
@@ -36,7 +18,6 @@ struct overBound {
  * @brief The main objective of this class is to define a wrapper for the most used SISL functions and to provide an in meters curve parametrization,
  *        internally applying a conversion from meters to Sisl parametrization. 
  */
-
 class Curve {
 
 public:
@@ -61,15 +42,15 @@ public:
     Curve(int type, SISLCurve * curve, int dimension = 3, int order = 3);
  
 
-    ////////////////// TOGLIERE??? ////////////////////////////
-    /**
-    * @brief Compute the position and the right-hand derivatives of a curve at a given parameter value.
-    * @details To compute the positione and the first derivatives of a curve at a given parameter value. Evaluation from the right hand side.
-    * @param[in] abscissa The parameter value where to compute the position.
-    * @param[out] worldF_position The point corresponding at the abscissa expressed in world frame.
-    */
-    void FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position);
-    //////////////////////////////////////////////
+    // ////////////////// TOGLIERE??? ////////////////////////////
+    // /**
+    // * @brief Compute the position and the right-hand derivatives of a curve at a given parameter value.
+    // * @details To compute the positione and the first derivatives of a curve at a given parameter value. Evaluation from the right hand side.
+    // * @param[in] abscissa The parameter value where to compute the position.
+    // * @param[out] worldF_position The point corresponding at the abscissa expressed in world frame.
+    // */
+    // void FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position);
+    // //////////////////////////////////////////////
 
 
 
@@ -199,6 +180,23 @@ public:
     */
     std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int const samples) const;
 
+    /**
+     * @brief Given an abscissa in meters return the corresponding point on the curve.
+     * 
+     * @param[in] abscissa_m abscissa on the curve in meters.
+     *  
+     * @return Eigen::Vector3d containing the point at abscissa_m.
+     */
+    Eigen::Vector3d At(double abscissa_m);
+
+    friend std::ostream& operator<< (std::ostream& os, const Curve& obj) {
+        return os 
+            << "Curve name: " << obj.name_
+            << " | Length: " << (obj.endParameter_m_ - obj.startParameter_m_)
+            << " | In meters parametrization interval: [" << obj.startParameter_m_ << ", " << obj.endParameter_m_ << "]"
+            << " | Sisl parametrization interval: " << obj.startParameter_s_ << ", " << obj.endParameter_s_ << "]";
+    };
+
 
     // Getters
     auto Dimension() const& {return dimension_;}
@@ -214,6 +212,7 @@ public:
     auto Length() const& {return endParameter_m_;}
     auto StartPoint() const& {return startPoint_;}
     auto EndPoint() const& {return endPoint_;}
+    auto Name() const& {return name_;}
 
 private:
 
@@ -228,6 +227,7 @@ protected:
     SISLCurve *curve_;
     int statusFlag_; // Control flag used as output of each SISL function
 
+    std::string name_;
     double startParameter_s_; // Start value of the curve parametrization
     double endParameter_s_; // Last value of the curve parametrization  
     double startParameter_m_;

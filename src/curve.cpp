@@ -13,8 +13,8 @@ Curve::Curve(int type, SISLCurve *curve, int dimension, int order)
         // Pick curve length.
         s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);       
 
-        FromAbsToPos(startParameter_s_, startPoint_);
-        FromAbsToPos(endParameter_s_, endPoint_);
+        FromAbsSislToPos(startParameter_s_, startPoint_);
+        FromAbsSislToPos(endParameter_s_, endPoint_);
 
         startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_);
 
@@ -30,16 +30,16 @@ Curve::Curve(int dimension, int order, int type)
 
 
 
-void Curve::FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position)
-{
-    int left{0}; // The SISL routine needs this variable, but it does not use the value.
-    if(abscissa < startParameter_s_) abscissa = startParameter_s_;
-    if(abscissa > endParameter_s_) abscissa = endParameter_s_;
-    // The second parameters is set to zero in order to compute the position without the successive derivatives.
+// void Curve::FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position)
+// {
+//     int left{0}; // The SISL routine needs this variable, but it does not use the value.
+//     if(abscissa < startParameter_s_) abscissa = startParameter_s_;
+//     if(abscissa > endParameter_s_) abscissa = endParameter_s_;
+//     // The second parameters is set to zero in order to compute the position without the successive derivatives.
 
     
-    s1221(curve_, 0, abscissa, &left, &worldF_position[0], &statusFlag_);
-}
+//     s1221(curve_, 0, abscissa, &left, &worldF_position[0], &statusFlag_);
+// }
 
 
 
@@ -161,6 +161,18 @@ void Curve::FromAbsMetersToPos(double abscissa_m, Eigen::Vector3d& worldF_positi
     s1221(curve_, 0, abscissa_s, &left, &worldF_position[0], &statusFlag_);
 }
 
+Eigen::Vector3d Curve::At(double abscissa_m) {
+
+    Eigen::Vector3d worldF_position{};
+    int left{0}; // The SISL routine needs this variable, but it does not use the value.
+    double abscissa_s{};
+    std::tie(abscissa_s, std::ignore) = MeterAbsToSislAbs(abscissa_m);
+    
+    s1221(curve_, 0, abscissa_s, &left, &worldF_position[0], &statusFlag_);
+
+    return worldF_position;
+}
+
 
 std::tuple<Eigen::Vector3d, double, overBound> Curve::MovePoint(double startValueAbscissa_m, double offset_m) {
 
@@ -178,9 +190,10 @@ std::tuple<Eigen::Vector3d, double, overBound> Curve::MovePoint(double startValu
     std::tie(abscissa_m, overBound) = SislAbsToMeterAbs(abscissa_s);
 
     // Obtain the point starting from the 
-    FromAbsMetersToPos(abscissa_m, point);
+    
+    //FromAbsMetersToPos(abscissa_m, point); // sostituito con At
 
-    return std::make_tuple(point, abscissa_m, overBound);
+    return std::make_tuple(At(abscissa_m), abscissa_m, overBound);
 }
 
 

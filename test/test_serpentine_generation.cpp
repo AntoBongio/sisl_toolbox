@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 
     auto serpentine = PathFactory::NewSerpentine(angle, offset, polygonVerteces);
 
-    // auto spiral = PathFactory::NewSpiral(Eigen::Vector3d{5, 12, 0}, Eigen::Vector3d{12, 2, 0}, 1);
+    auto spiral = PathFactory::NewSpiral(Eigen::Vector3d{5, 12, 0}, Eigen::Vector3d{12, 2, 0}, 1);
 
     PersistenceManager::SaveObj(serpentine->Sampling(350), "/home/antonino/Desktop/sisl_toolbox/script/serpentine.txt");
 

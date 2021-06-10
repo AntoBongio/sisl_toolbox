@@ -6,11 +6,13 @@ std::shared_ptr<Path> PathFactory::NewHippodrome(std::vector<Eigen::Vector3d> po
 
         auto hippodrome = std::make_shared<Path>();
 
+        hippodrome->name_ = "Hippodrome";
+
         try {
             if(points.size() != 4)
                 throw points.size();
 
-            std::cout << "[PathFactory] -> Building a Hippodrome" << std::endl;
+            // std::cout << "[PathFactory] -> Building a Hippodrome" << std::endl;
 
             hippodrome->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(points[0], points[1]));
 
@@ -31,11 +33,13 @@ std::shared_ptr<Path> PathFactory::NewPolygon(std::vector<Eigen::Vector3d> point
 
         auto polygon = std::make_shared<Path>();
 
+        polygon->name_ = "Polygon";
+
         try {
             if(points.size() < 2)
                 throw points.size();
 
-            std::cout << "[PathFactory] -> Building a Polygon" << std::endl;
+            // std::cout << "[PathFactory] -> Building a Polygon" << std::endl;
 
             for(auto it = points.begin(); it != (points.end() - 1); ++it) {
                 polygon->AddCurveBack<StraightLine>(CurveFactory::NewCurve<StraightLine>(*it, *(it + 1)));
@@ -51,9 +55,11 @@ std::shared_ptr<Path> PathFactory::NewPolygon(std::vector<Eigen::Vector3d> point
 
 std::shared_ptr<Path> PathFactory::NewSpiral(Eigen::Vector3d centrePoint, Eigen::Vector3d startPoint, double radiusOffset) {
 
-        std::cout << "[PathFactory] -> Building a Spiral" << std::endl;
+        // std::cout << "[PathFactory] -> Building a Spiral" << std::endl;
 
         auto spiral = std::make_shared<Path>();
+
+        spiral->name_ = "Spiral";
 
         double const angle{3.14};
         double radius {Distance(centrePoint, startPoint)};
@@ -79,9 +85,11 @@ std::shared_ptr<Path> PathFactory::NewSpiral(Eigen::Vector3d centrePoint, Eigen:
 
 std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces) {
 
-    std::cout << "[PathFactory] -> Building a Serpentine" << std::endl;
+    // std::cout << "[PathFactory] -> Building a Serpentine" << std::endl;
 
     auto serpentine = std::make_shared<Path>();
+
+    serpentine->name_ = "Serpentine";
 
     auto polygon = PathFactory::NewPolygon(polygonVerteces);
 
@@ -326,7 +334,7 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
             double abscissa { 0 };
             // Take the previous curve and evaluate the closest point w.r.t. the nearest point on the next curve (obtain the abscissa and then generate the point).
             std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i - 1]->FindClosestPoint(intersectionPoints[index - intersec.size() + 1]);
-            parallelStraightLines->Curves()[i - 1]->FromAbsToPos(abscissa, middlePoint);
+            middlePoint = parallelStraightLines->Curves()[i - 1]->At(abscissa);
 
             // std::cout << "intersectionPoints[index - intersec.size() + 1]: [" << intersectionPoints[index - intersec.size() + 1][0] << ", " 
             //     << intersectionPoints[index - intersec.size() + 1][1] << ", " << intersectionPoints[index - intersec.size() + 1][2] 
@@ -410,7 +418,7 @@ std::shared_ptr<Path> PathFactory::NewSerpentine(double angle, double offset, st
                 double angleTest {3.14};
 
                 std::tie(abscissa, std::ignore) = parallelStraightLines->Curves()[i]->FindClosestPoint(intersectionPoints[index - intersec.size()]);
-                parallelStraightLines->Curves()[i]->FromAbsToPos(abscissa, middlePoint);
+                middlePoint = parallelStraightLines->Curves()[i]->At(abscissa);
 
                 circlePoints.push_back(intersectionPoints[index - intersec.size()]);
 

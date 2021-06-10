@@ -78,15 +78,15 @@ if(BUILD_TESTS)
     add_executable(test_hippodrome test/test_hippodrome.cpp)
     target_link_libraries(test_hippodrome sisl_toolbox)
 
-    add_executable(test_serpentine_movePoint test/test_serpentine_movePoint.cpp)
-    target_link_libraries(test_serpentine_movePoint sisl_toolbox)
+    add_executable(test_polygon test/test_polygon.cpp)
+    target_link_libraries(test_polygon sisl_toolbox)
 
-    #add_executable(test_serpentine_extractSection test/test_serpentine_extractSection.cpp)
-    #target_link_libraries(test_serpentine_extractSection sisl_toolbox)
+    add_executable(test_spiral test/test_spiral.cpp)
+    target_link_libraries(test_spiral sisl_toolbox)
 
-    add_executable(test_serpentine_generation test/test_serpentine_generation.cpp)
-    target_link_libraries(test_serpentine_generation sisl_toolbox)
+    add_executable(test_serpentine test/test_serpentine.cpp)
+    target_link_libraries(test_serpentine sisl_toolbox)
 
 
-    add_test(test_hippodrome test_serpentine test_serpentine_movePoint test_serpentine_extractSection test_serpentine_generation)
+    add_test(test_hippodrome test_polygon test_spiral test_serpentine)
 endif(BUILD_TESTS)

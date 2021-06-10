@@ -10,6 +10,7 @@ GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Ei
     , weights_{weights}
     , coefficients_{coefficients}
     {
+        name_ = "Generic Curve";
 
         int kind{2}; /* Type of curve.
                     = 1 : Polynomial B-spline curve.
@@ -40,8 +41,8 @@ GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Ei
         // Pick curve length.
         s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);  
 
-        FromAbsToPos(startParameter_s_, startPoint_);
-        FromAbsToPos(endParameter_s_, endPoint_);    
+        FromAbsSislToPos(startParameter_s_, startPoint_);
+        FromAbsSislToPos(endParameter_s_, endPoint_);    
 
         startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_); 
     }
