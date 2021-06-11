@@ -1,5 +1,7 @@
 #include "sisl_toolbox/path.hpp"
 
+#include "sisl_toolbox/curve.hpp" 
+#include <exception>
 
 Path::Path()
 : curvesNumber_{0} 
@@ -23,7 +25,19 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& cu
 
     int count = 1;
     for(auto i = 0; i < curves_.size(); ++i) {
-        std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
+
+        // try {
+        //     std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
+        // } catch (const char* exception) {
+        //     throw exception;
+        // }
+        
+        
+        try {
+            std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
+        } catch(std::runtime_error const& exception) {
+            throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
+        }
 
         if(minDistance > 0 and distance < minDistance) {
             minDistance = distance;
@@ -36,13 +50,24 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& cu
             abscissa_m = abscissaTmp_m;
         }
     }
-    curves_[curveId]->FromAbsMetersToPos(abscissa_m, closestPoint);
+    try {
+        curves_[curveId]->FromAbsMetersToPos(abscissa_m, closestPoint);
+    } catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Path::FindClosestPoint] -> ") + exception.what());
+    }
 
     return closestPoint;
 }
 
 
 std::tuple<double, int, overBound> Path::PathAbsToCurveAbs(double abscissa_m) {
+
+    if(abscissa_m < startParameter_m_){
+        throw std::runtime_error("[Path::PathAbsToCurveAbs] Input parameter error. abscissa_m before startParameter_m_");
+    }
+    if(abscissa_m > endParameter_m_) {
+        throw std::runtime_error("[Path::PathAbsToCurveAbs] Input parameter error. abscissa_m veyond endParameter_m_");
+    }
 
     overBound overBound{};
     double abscissaCurve_m{};
@@ -81,10 +106,10 @@ std::tuple<double, overBound> Path::CurveAbsToPathAbs(double abscissaCurve_m, in
 
     overBound overBound{};
     double abscissa_m{0};
-    if(curveId < 0 or curveId > (curvesNumber_ - 1)) {
-        std::cout << "CurveId error!!!" << std::endl;
-        return std::make_tuple(abscissa_m, overBound);
-    }
+
+    if(curveId < 0 or curveId > (curvesNumber_ - 1)) 
+        throw std::runtime_error(std::string("[Path::CurveAbsToPathAbs] CurveId out of bound!!"));
+
 
     // Eval abscissa_m up to the start of the curve of curveId
     for(auto i = 0; i < curveId; ++i)
@@ -92,7 +117,6 @@ std::tuple<double, overBound> Path::CurveAbsToPathAbs(double abscissaCurve_m, in
 
     if(abscissaCurve_m < curves_[curveId]->StartParameter_m()) {
         overBound.setLower(abscissaCurve_m, curves_[curveId]->StartParameter_m());
-
     }
     else if (abscissaCurve_m > curves_[curveId]->EndParameter_m()) {
         overBound.setUpper(abscissaCurve_m, curves_[curveId]->EndParameter_m());
@@ -112,6 +136,13 @@ Eigen::Vector3d Path::At(double abscissa_m) {
     overBound overBound{};
     double abscissaCurve_m{0};
     int curveId{0};
+    
+    if(abscissa_m < startParameter_m_){
+        throw std::runtime_error("[Path::At] Input parameter error. abscissa_m before startParameter_m_");
+    }
+    if(abscissa_m > endParameter_m_) {
+        throw std::runtime_error("[Path::At] Input parameter error. abscissa_m veyond endParameter_m_");
+    }
 
     std::tie(abscissaCurve_m, curveId, overBound) = PathAbsToCurveAbs(abscissa_m);
 
@@ -128,29 +159,39 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
     int curveId{0};
 
     if(startValue_m < startParameter_m_){
-        std::cout << "Received an incorrect starting value! Fixing.." << std::endl;
-        startValue_m = startParameter_m_;
+        throw std::runtime_error("[Path::ExtractSection] Input parameter error. startValue_m before startParameter_m_");
+        // std::cout << "Received an incorrect starting value! Fixing.." << std::endl;
+        // startValue_m = startParameter_m_;
     }
     if(endValue_m > endParameter_m_) {
-        std::cout << "Received an incorrect ending value! Fixing.." << std::endl;
-        endValue_m = endParameter_m_;
+        throw std::runtime_error("[Path::ExtractSection] Input parameter error. endValue_m veyond endParameter_m_");
+        // std::cout << "Received an incorrect ending value! Fixing.." << std::endl;
+        // endValue_m = endParameter_m_;
     }
 
     double portionLength{endValue_m - startValue_m};
 
-    double beyondLowerLimit{};
-    double beyondUpperLimit{};
-
     std::tie(abscissaCurve_m, curveId, std::ignore) = PathAbsToCurveAbs(startValue_m);
 
     if(portionLength < curves_[curveId]->EndParameter_m() - abscissaCurve_m) {
-        pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractCurveSection(
-            abscissaCurve_m, portionLength, beyondLowerLimit, beyondUpperLimit));
+
+        try {
+            pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(
+            abscissaCurve_m, portionLength));
+        } catch (std::runtime_error const& exception) {
+            throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
+        }       
+
         portionLength = 0;
     }
     else {
-        pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractCurveSection(
-        abscissaCurve_m, curves_[curveId]->EndParameter_m(), beyondLowerLimit, beyondUpperLimit));
+        try {
+            pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(
+                abscissaCurve_m, curves_[curveId]->EndParameter_m()));
+        } catch (std::runtime_error const& exception) {
+            throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
+        }
+
         portionLength -= curves_[curveId]->EndParameter_m() - abscissaCurve_m;
         ++curveId;
     }
@@ -158,9 +199,15 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
     while(portionLength > 0 and curveId < curvesNumber_ ) {
     
         if(portionLength < curves_[curveId]->EndParameter_m()) {
-            pathPortion->AddCurveBack<Curve>(
-                curves_[curveId]->ExtractCurveSection(curves_[curveId]->StartParameter_m(), portionLength, beyondLowerLimit, beyondUpperLimit));
-                portionLength = 0;
+            
+            try {
+                pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(curves_[curveId]->StartParameter_m(), 
+                    portionLength));
+            } catch (std::runtime_error const& exception) {
+                throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
+            }
+
+            portionLength = 0;
         }
         else {
             pathPortion->AddCurveBack<Curve>(curves_[curveId]);
@@ -179,9 +226,14 @@ std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Path> otherPath)
 
     for(auto const & curve: curves_) {
         for(auto const & otherCurve: otherPath->Curves()) {
-
-            auto intersectionPoints = curve->Intersection(otherCurve);
-
+            
+            std::vector<Eigen::Vector3d> intersectionPoints;
+            try {
+                intersectionPoints = curve->Intersection(otherCurve);
+            } catch (std::runtime_error const& exception) {
+                throw std::runtime_error(std::string("[Path::Intersection] -> ") + exception.what());
+            }
+            
             for (auto const & point: intersectionPoints) {
 
                 for(auto const & intersection: intersections) {
@@ -202,10 +254,18 @@ std::vector<Eigen::Vector3d> Path::Intersection(int curveId, std::shared_ptr<Pat
 
     if(curveId > curvesNumber_ - 1)
         return intersections;
+    
+    std::vector<Eigen::Vector3d> intersectionPoints;
 
     for(auto const & otherCurve: otherPath->Curves()) {
 
-        auto intersectionPoints = curves_[curveId]->Intersection(otherCurve);
+        try {
+
+            intersectionPoints = curves_[curveId]->Intersection(otherCurve);
+
+        } catch (std::runtime_error const& exception) {
+            throw std::runtime_error(std::string("[Path::Intersection] -> ") + exception.what());
+        }
 
         for (auto const & point: intersectionPoints) {
 

@@ -1,11 +1,10 @@
-#ifndef GENERICCURVE_HPP
-#define GENERICCURVE_HPP
+#pragma once
 
 #include <vector>
 #include <eigen3/Eigen/Dense>
 
-#include "sisl_toolbox/defines.hpp"
 #include "sisl_toolbox/curve.hpp"
+
 
 class GenericCurve : public Curve{
 
@@ -40,4 +39,3 @@ private:
     std::vector<double> weights_;
     std::vector<double> coefficients_;
 };
-#endif

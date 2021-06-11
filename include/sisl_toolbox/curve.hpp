@@ -26,32 +26,18 @@ public:
      * 
      * @param dimension Define dimension of curve
      * @param order Define order of curve
-     * @param type Curve type -> 0 : Generic Curve ; 1 : Straight Line ; 2 : Circle
      */ 
-    Curve(int type, int dimension = 3, int order = 3);
+    Curve(int dimension = 3, int order = 3);
 
     /** 
      * @brief Curve constructor.
      * 
-     * @param type Curve type -> 0 : Generic Curve ; 1 : Straight Line ; 2 : Circle
      * @param curve Pointer to the curve 
      * @param  dimension Define dimension of curve
      * @param order Define order of curve
      * 
      */ 
-    Curve(int type, SISLCurve * curve, int dimension = 3, int order = 3);
- 
-
-    // ////////////////// TOGLIERE??? ////////////////////////////
-    // /**
-    // * @brief Compute the position and the right-hand derivatives of a curve at a given parameter value.
-    // * @details To compute the positione and the first derivatives of a curve at a given parameter value. Evaluation from the right hand side.
-    // * @param[in] abscissa The parameter value where to compute the position.
-    // * @param[out] worldF_position The point corresponding at the abscissa expressed in world frame.
-    // */
-    // void FromAbsToPos(double abscissa, Eigen::Vector3d& worldF_position);
-    // //////////////////////////////////////////////
-
+    Curve(SISLCurve * curve, int dimension = 3, int order = 3);
 
 
     /**
@@ -59,25 +45,11 @@ public:
     * @details It extracts a new curve from the stating one according to the abscissa startValue and endValue.
     * @param[in] startValue_m Start parameter value of the part curve to be picked (in meters).
     * @param[in] endValue_m End parameter value of the part curve to be picked (in meters).
-    * @param[out] beyondLowerLimit Distance in meters beyond the upper limit of the curve
-    * @param[out] beyondUpperLimit Distance in meters beyond the lower limit of the curve
     * 
     * @return A shared ptr to the curve object.
     */
-    std::shared_ptr<Curve> ExtractCurveSection(double startValue_m, double endValue_m, double& beyondLowerLimit, double& beyondUpperLimit);
+    std::shared_ptr<Curve> ExtractSection(double startValue_m, double endValue_m);
     
-
-    ////////////////// TOGLIERE??? ////////////////////////////
-    /**
-    * @brief Transform the abscissa value into a distance in meters from the starting point.
-    * @param[in] abscissa Parameter value up to which you want to calculate the distance in meters.
-    * 
-    * @return The along curve distance in meters from the stating point of the curve to abscissa parameter.
-    */
-    double AlongCurveDistance(double const abscissa);
-    //////////////////////////////////////////////
-
-
 
     /**
     * @brief Find the closest point between a curve and a point. Simple version.
@@ -131,16 +103,6 @@ public:
 
 
     /**
-    * @brief Move a point on the curve of a displacement along the curve (use curve parametrization in meters).
-    * @param[in] startValueAbscissa_m Starting position (abscissa in meters) of the point.
-    * @param[in] offset_m offset (in meters) to displace the point.
-    * 
-    * @return A tuple containing respectively: the final point, the final abscissa (in meters), a struct overBound to report overBound Events.
-    */
-    std::tuple<Eigen::Vector3d, double, overBound> MovePoint(double startValueAbscissa_m, double offset_m);
-
-
-    /**
     * @brief Convert from Sisl parametrization to Meters parametrization. 
     *       Check if an overbound event happens (w.r.t. both extrema), meaning that the passed abscissa_s is greater than
     *       the upper limit of the curve parametrization (the one generated automatically by the SISL routines) or is lower
@@ -180,6 +142,7 @@ public:
     */
     std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int const samples) const;
 
+
     /**
      * @brief Given an abscissa in meters return the corresponding point on the curve.
      * 
@@ -189,12 +152,13 @@ public:
      */
     Eigen::Vector3d At(double abscissa_m);
 
+
     friend std::ostream& operator<< (std::ostream& os, const Curve& obj) {
         return os 
             << "Curve name: " << obj.name_
             << " | Length: " << (obj.endParameter_m_ - obj.startParameter_m_)
             << " | In meters parametrization interval: [" << obj.startParameter_m_ << ", " << obj.endParameter_m_ << "]"
-            << " | Sisl parametrization interval: " << obj.startParameter_s_ << ", " << obj.endParameter_s_ << "]";
+            << " | Sisl parametrization interval: [" << obj.startParameter_s_ << ", " << obj.endParameter_s_ << "]";
     };
 
 
@@ -202,7 +166,6 @@ public:
     auto Dimension() const& {return dimension_;}
     auto Order() const& {return order_;}
     auto Epsge() const& {return epsge_;}
-    auto Type() const& {return type_;}
     auto CurvePtr() const& {return curve_;}
     auto StatusFlag() const& {return statusFlag_;}
     auto StartParameter_s() const& {return startParameter_s_;}
@@ -214,6 +177,7 @@ public:
     auto EndPoint() const& {return endPoint_;}
     auto Name() const& {return name_;}
 
+
 private:
 
     friend class CurveFactory;
@@ -221,7 +185,6 @@ private:
     int dimension_; // Dimension of the curve
     int order_; // Order of the curve
     double epsge_; // Geometric resolution
-    int type_;
 
 protected:
     SISLCurve *curve_;

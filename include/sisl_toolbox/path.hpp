@@ -7,12 +7,10 @@
 #include <map>
 #include <eigen3/Eigen/Dense>
 
-#include "sisl_toolbox/generic_curve.hpp"
-#include "sisl_toolbox/straight_line.hpp"
-#include "sisl_toolbox/circle.hpp"
 #include "sisl_toolbox/defines.hpp" 
 
 class PathFactory;
+class Curve;
 
 /** TODO: Fare forward declaration delle classi ed includerle nel .cpp ? */
 
@@ -139,9 +137,14 @@ public:
      */
     std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Path> otherPath);  
 
+
+
     // Define [] operator
-    std::shared_ptr<Curve>& operator[](std::size_t idx) { return curves_[idx]; }
-    const std::shared_ptr<Curve>& operator[](std::size_t idx) const { return curves_[idx]; }
+    std::shared_ptr<Curve>& operator[](std::size_t const idx) { return curves_[idx]; }
+    const std::shared_ptr<Curve>& operator[](std::size_t const idx) const { return curves_[idx]; }
+
+
+    
 
     friend std::ostream& operator<< (std::ostream& os, const Path& obj) {
         return os 

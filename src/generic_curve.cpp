@@ -3,7 +3,7 @@
 
 GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Eigen::Vector3d> points, std::vector<double> weights, 
     std::vector<double> coefficients, int dimension, int order)
-    : Curve(dimension, order, GENERICCURVE)
+    : Curve(dimension, order)
     , degree_{degree}
     , knots_{knots}
     , points_{points}

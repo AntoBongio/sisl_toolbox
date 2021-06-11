@@ -4,18 +4,16 @@
 #include <memory>
 #include <vector>
 #include <eigen3/Eigen/Dense>
-#include <sisl_toolbox/defines.hpp>
-#include <sisl_toolbox/curve_factory.hpp>
-#include <sisl_toolbox/path.hpp>
 
-// Momentaneamente
+
+
+#include <sisl_toolbox/defines.hpp>
+
+
+/** MOMENTANEO: */ 
 #include "sisl_toolbox/persistence_manager.hpp"
 
-struct SISLCurve; /** Forward declaration */
-class Curve; /** Forward declaration */
-class Circle; /** Forward declaration */
-class StraightLine; /** Forward declaration */
-class GenericCurve; /** Forward declaration */
+class Path;
 
 class PathFactory
 {

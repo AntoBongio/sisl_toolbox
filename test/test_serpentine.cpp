@@ -1,4 +1,4 @@
-#include "test/test_path.hpp"
+#include "test/test_serpentine.hpp"
 #include <vector>
 
 #include <iomanip>
@@ -12,13 +12,32 @@ int main(int argc, char** argv) {
     // unsync the I/O of C and C++.
     std::ios_base::sync_with_stdio(false);
 
-    std::shared_ptr<Path> hippodrome;
+    ctb::LatLong centroid{44.39173292288923, 8.945241571195552};
+
+    std::vector<ctb::LatLong> pointLatLong {
+        ctb::LatLong(44.39103097698746, 8.94579379703305) , 
+        ctb::LatLong(44.39130994954367, 8.946484085232179) ,
+        ctb::LatLong(44.3921468857443, 8.946245637251524) , 
+        ctb::LatLong(44.39244386538219, 8.94470188296125) ,
+        ctb::LatLong(44.3915259324859, 8.943999052589279) ,
+        ctb::LatLong(44.39074299756334, 8.94435048387282)};
+
+
+    std::vector<Eigen::Vector3d> polygonVerteces(pointLatLong.size(), Eigen::Vector3d::Zero());
+    for(auto i = 0; i < polygonVerteces.size(); i++) {
+        ctb::LatLong2LocalNED(pointLatLong[i], 0.0, centroid, polygonVerteces[i]);
+        polygonVerteces[i][2] = 0;
+    }
+
+    double angle{90.0}; 
+    double offsetPath{10.0};
+
+    std::shared_ptr<Path> serpentine;
 
     try {
-        hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{10, 0, 0}, 
-                                                                            Eigen::Vector3d{10, 10, 0}, Eigen::Vector3d{0, 10, 0}});
+        serpentine = PathFactory::NewSerpentine(angle, offsetPath, polygonVerteces);
 
-        std::cout << *hippodrome << std::endl;
+        std::cout << *serpentine << std::endl;
 
         auto end = std::chrono::high_resolution_clock::now();
         // Calculating total time taken by the program.
@@ -27,24 +46,24 @@ int main(int argc, char** argv) {
         std::cout << "Time taken to build the Path object : " << std::fixed << std::setprecision(9) << time_taken  << " sec" << std::endl;
         std::cout << std::fixed << std::setprecision(3); 
 
-        PersistenceManager::SaveObj(hippodrome->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/path.txt");
+        PersistenceManager::SaveObj(serpentine->Sampling(1500), "/home/antonino/Desktop/sisl_toolbox/script/path.txt");
 
         double abscissaCurve_m{0};
         int curveId{0};
 
-        // std::cout << std::endl << hippodrome->Name() << " is composed by: " << std::endl;
-        // for(int i = 0; i < hippodrome->CurvesNumber(); ++i) {
-        //     std::cout << i << ". " << *hippodrome->Curves()[i] << std::endl;
+        // std::cout << std::endl << serpentine->Name() << " is composed by: " << std::endl;
+        // for(int i = 0; i < serpentine->CurvesNumber(); ++i) {
+        //     std::cout << i << ". " << *serpentine->Curves()[i] << std::endl;
         // }
 
 
         /***************** Parametrizations mapping *****************/
         
         double absPath_m{10};
-        std::tie(abscissaCurve_m, curveId, std::ignore) = hippodrome->PathAbsToCurveAbs(absPath_m);
+        std::tie(abscissaCurve_m, curveId, std::ignore) = serpentine->PathAbsToCurveAbs(absPath_m);
         std::cout << std::endl << "Given abscissa path " << absPath_m << ", convert in Curve parametrization -> curveId: " 
             << curveId << ", abscissaCurve_m: " << abscissaCurve_m << std::endl;
-        std::tie(absPath_m, std::ignore) = hippodrome->CurveAbsToPathAbs(abscissaCurve_m, curveId);
+        std::tie(absPath_m, std::ignore) = serpentine->CurveAbsToPathAbs(abscissaCurve_m, curveId);
         std::cout << "Inverse transformation -> Given curveId " << curveId << " and abscissaCurve_m: " << abscissaCurve_m 
             << " -> , abscissa path: " << absPath_m << std::endl;
 
@@ -53,14 +72,14 @@ int main(int argc, char** argv) {
 
         std::ofstream outputIntersection;
         outputIntersection.open ("/home/antonino/Desktop/sisl_toolbox/script/intersectionPoints.txt");
-        auto line = CurveFactory::NewCurve<StraightLine>(Eigen::Vector3d{7.5, -2, 0}, Eigen::Vector3d{7.5, 12, 0});
-        auto linePath = std::make_shared<Path>();
-        linePath->AddCurveBack(line);
-        PersistenceManager::SaveObj(line->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/intersectingCurve.txt");
+        auto intersectingCurve = CurveFactory::NewCurve<Circle>(6.28, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{60, 37, 0}, Eigen::Vector3d{45, 35, 0});
+        auto intersectingPath = std::make_shared<Path>();
+        intersectingPath->AddCurveBack(intersectingCurve);
+        PersistenceManager::SaveObj(intersectingCurve->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/intersectingCurve.txt");
 
-        auto intersectionPoints = hippodrome->Intersection(linePath);
+        auto intersectionPoints = serpentine->Intersection(intersectingPath);
 
-        std::cout << std::endl << "Given -> " << *line << std::endl;
+        std::cout << std::endl << "Given -> " << *intersectingCurve << std::endl;
         std::cout << "The intersection points are:  "<< std::endl;
 
         double counter{1};
@@ -73,10 +92,17 @@ int main(int argc, char** argv) {
 
         /***************** Closest Point Problem  *****************/
 
-        Eigen::Vector3d findNearThis{15.5, 13, 0};
+        Eigen::Vector3d findNearThis{-20, -20, 0};
         double abscissaClosest{0};
         int curveIdClosest{0};
-        auto closestPoint = hippodrome->FindClosestPoint(findNearThis, curveIdClosest, abscissaClosest);
+
+        Eigen::Vector3d closestPoint{};
+        try {
+            closestPoint = serpentine->FindClosestPoint(findNearThis, curveIdClosest, abscissaClosest);
+        } 
+        catch (std::runtime_error const& exception) {
+            std::cout << "Exception -> " << exception.what() << std::endl;
+        }
 
         std::cout << std::endl << "Starting from point [" << findNearThis[0] << ", " << findNearThis[1] << ", " << findNearThis[2] << "]"
             << " the closest point on the path is [" << closestPoint[0] << ", " << closestPoint[1] << ", " << closestPoint[2] << "]" << std::endl;
@@ -95,13 +121,13 @@ int main(int argc, char** argv) {
         std::ofstream outputFile2;
         outputFile2.open ("/home/antonino/Desktop/sisl_toolbox/script/movePoint.txt"); 
 
-        auto startPoint = hippodrome->At(abscissaStartPoint);
+        auto startPoint = serpentine->At(abscissaStartPoint);
         std::cout << std::endl << "Point at abscissa: " << abscissaStartPoint << " is [" << startPoint[0] << ", " 
             << startPoint[1] << ", " << startPoint[2] << "]" << std::endl;
         outputFile2 << abscissaStartPoint << " " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
         
         abscissaStartPoint += offset;
-        startPoint = hippodrome->At(abscissaStartPoint);
+        startPoint = serpentine->At(abscissaStartPoint);
         std::cout << "Moved at abscissa: " << abscissaStartPoint << " -> [" << startPoint[0] << ", " 
             << startPoint[1] << ", " << startPoint[2] << "]" << std::endl;
         outputFile2 << abscissaStartPoint << " " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
@@ -111,10 +137,18 @@ int main(int argc, char** argv) {
 
         /***************** Extract Path Section Problem  *****************/
 
-        auto pathSection = hippodrome->ExtractSection(5, 50);
-        PersistenceManager::SaveObj(pathSection->Sampling(100), "/home/antonino/Desktop/sisl_toolbox/script/pathSection.txt");
-    
-    } catch(std::runtime_error const& exception) {
+        std::shared_ptr<Path> pathSection;
+        try {
+            pathSection = serpentine->ExtractSection(300, 700);
+        } 
+        catch (std::runtime_error const& exception) {
+            std::cout << "Exception -> " << exception.what() << std::endl;
+        }
+            
+        if(pathSection)
+            PersistenceManager::SaveObj(pathSection->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/pathSection.txt");
+    }
+    catch(std::runtime_error const& exception) {
         std::cout << "Received exception from --> " << exception.what() << std::endl;
     }
 

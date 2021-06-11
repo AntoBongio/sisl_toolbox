@@ -47,7 +47,7 @@ import matplotlib.pyplot as plt
 figure = plt.figure()
 figure.set_figwidth(10)
 figure.set_figheight(12)
-ax = plt.axes(projection='3d')
+ax = plt.axes(projection='3d',  adjustable='box')
 plt.title('Path')
 plt.xlabel("y")
 plt.ylabel("x")
@@ -60,6 +60,7 @@ ax.plot3D(x, y, z, 'blue', label='Path')
 ax.scatter3D(x[0], y[0], z[0], 'yellow', label='Start point')
 
 ax.scatter3D(x.iloc[-1], y.iloc[-1], z.iloc[-1], 'red', label='Last point')
+
 
 if len(sys.argv) > 1:
     if "closestPoint" in sys.argv:

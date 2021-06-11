@@ -15,7 +15,7 @@ endif()
 # Define library. Only source files here!
 project(sisl_toolbox VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
+#set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 
 option(BUILD_TESTS "Compile tests" ON)
 option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
@@ -31,7 +31,7 @@ add_library(sisl_toolbox SHARED
 )
 
 
-target_link_libraries(sisl_toolbox sisl jsoncpp Geographic)
+target_link_libraries(sisl_toolbox sisl Geographic)
 
 set_target_properties(sisl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 

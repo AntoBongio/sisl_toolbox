@@ -3,7 +3,7 @@
 
 
 StraightLine::StraightLine(Eigen::Vector3d startPoint, Eigen::Vector3d endPoint, int dimension, int order)
-    : Curve(dimension, order, STRAIGHTLINE)
+    : Curve(dimension, order)
     {        
         name_ = "Straight Line";
 

@@ -20,23 +20,7 @@ public:
     static std::shared_ptr<T> NewCurve(Args... args) {
 
         return std::make_shared<T>(args...);
-
-        // switch(type) {
-        //     case 0:
-        //         std::cout << "[CurveFactory] -> Building a GenericCurve" << std::endl;
-        //         return std::make_shared<T>(args...);
-        //         break;
-        //     case 1:
-        //     {
-        //         std::cout << "[CurveFactory] -> Building a StraightLine" << std::endl;
-        //         return std::make_shared<T>(args...);
-        //         break;
-        //     } 
-        //     case 2:
-        //         std::cout << "[CurveFactory] -> Building a Circle" << std::endl; 
-        //         return std::make_shared<T>(args...);
-        //         break;
-        // }
+        
     }
 
 

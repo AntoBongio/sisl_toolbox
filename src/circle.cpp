@@ -2,7 +2,7 @@
 #include "sisl.h"
 
 Circle::Circle(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, int dimension, int order) 
-    : Curve(dimension, order, 2)
+    : Curve(dimension, order)
     , angle_{angle}
     , axis_{axis}
     , centrePoint_{centrePoint}

@@ -1,8 +1,6 @@
-#ifndef CIRCLE_HPP
-#define CIRCLE_HPP
+#pragma once
 
 #include "sisl_toolbox/curve.hpp"
-#include "sisl_toolbox/defines.hpp"
 
 class Circle : public Curve{
 
@@ -20,7 +18,6 @@ public:
      * @param order Parameter used in Curve constructor -> default = 3
      */
     Circle(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, int dimension = 3, int order = 3);
-    /** PROBLEMA: Non riesco a metterla privata perchè CurveFactory non la vede!! */
     
 
     // Getter / Setter methods
@@ -30,12 +27,9 @@ public:
 
 private:
 
-    friend class CurveFactory;
-
     double angle_;
     Eigen::Vector3d axis_;
     Eigen::Vector3d centrePoint_;
 
 
 };
-#endif
