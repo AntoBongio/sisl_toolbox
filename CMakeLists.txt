@@ -17,6 +17,14 @@ project(sisl_toolbox VERSION 0.1 LANGUAGES CXX)
 
 #set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 option(BUILD_TESTS "Compile tests" ON)
 option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
 
@@ -87,6 +95,9 @@ if(BUILD_TESTS)
     add_executable(test_serpentine test/test_serpentine.cpp)
     target_link_libraries(test_serpentine sisl_toolbox)
 
+    add_executable(test_new_path test/test_new_path.cpp)
+    target_link_libraries(test_new_path sisl_toolbox)
 
-    add_test(test_hippodrome test_polygon test_spiral test_serpentine)
+
+    add_test(test_hippodrome test_polygon test_spiral test_serpentine test_new_path)
 endif(BUILD_TESTS)

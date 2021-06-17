@@ -9,6 +9,7 @@ data = pd.read_csv('path.txt', sep='\s+', header=None)
 data = pd.DataFrame(data)
 
 
+
 if len(sys.argv) > 1:
     if "closestPoint" in sys.argv:
         findNearProblem = pd.read_csv('closestPoint.txt', sep='\s+', header=None)
@@ -84,6 +85,17 @@ if len(sys.argv) > 1:
         for elem in intersection_points:
             ax.scatter3D(elem[0], elem[1], elem[2], 'black', label="intersec " + str(elem[3]) )
             ax.legend()
+
+
+
+
+# ADDED
+dataPolygon = pd.read_csv('polygon.txt', sep='\s+', header=None)
+dataPolygon = pd.DataFrame(dataPolygon)
+xPolygon = dataPolygon[1]
+yPolygon = dataPolygon[0]
+zPolygon = -dataPolygon[2]
+ax.plot3D(xPolygon, yPolygon, zPolygon, 'red', label='Polygon')
 
 
 ax.legend()

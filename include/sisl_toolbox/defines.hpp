@@ -7,8 +7,8 @@
 #define STRAIGHTLINE 1
 #define CIRCLE 2
 
-#define RIGHT true
-#define LEFT false
+#define RIGHT 1
+#define LEFT 2
 
 struct overBound {
 

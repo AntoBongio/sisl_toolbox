@@ -12,6 +12,7 @@ StraightLine::StraightLine(Eigen::Vector3d startPoint, Eigen::Vector3d endPoint,
             endParameter_s_ = 0;
             startParameter_m_ = 0; 
             endParameter_m_ = 0;
+            length_ = 0;
             curve_ = nullptr;
         }
         else {
@@ -28,5 +29,7 @@ StraightLine::StraightLine(Eigen::Vector3d startPoint, Eigen::Vector3d endPoint,
             FromAbsSislToPos(endParameter_s_, endPoint_); 
 
             startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_); 
+
+            length_ = std::abs(endParameter_m_ - startParameter_m_);
         }
     }

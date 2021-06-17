@@ -22,5 +22,7 @@ Circle::Circle(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, E
         FromAbsSislToPos(endParameter_s_, endPoint_);
 
         startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_);
+
+        length_ = std::abs(endParameter_m_ - startParameter_m_);
     }
 

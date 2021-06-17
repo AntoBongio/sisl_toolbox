@@ -23,7 +23,8 @@ public:
     static std::shared_ptr<Path> NewPolygon(std::vector<Eigen::Vector3d> points);
     static std::shared_ptr<Path> NewSpiral(Eigen::Vector3d centrePoint, Eigen::Vector3d startPoint, double radiusOffset);
     static std::shared_ptr<Path> NewSerpentine(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
-    
+
+    static std::shared_ptr<Path> NewNewPath(double angle, int direction, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
 
 private: 
     /** 
@@ -52,7 +53,7 @@ private:
         double minX{polygonVerteces[0][0]};
         double maxY{polygonVerteces[0][1]};
         double minY{polygonVerteces[0][1]};
-        for(auto i = 1; i < polygonVerteces.size(); i++) {
+        for(std::size_t i = 1; i < polygonVerteces.size(); i++) {
             if(maxX < polygonVerteces[i][0])
                 maxX = polygonVerteces[i][0];
             if(minX > polygonVerteces[i][0])
@@ -91,6 +92,9 @@ private:
         return angle * M_PI / 180.0;
     };
 
+    static auto RadToDeg (double angle) {
+        return angle * 180.0 / M_PI;
+    };
 
 };
 

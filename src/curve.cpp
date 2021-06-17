@@ -7,6 +7,7 @@ Curve::Curve(int dimension, int order)
     , order_{order}
     , endParameter_m_{0}
     , startParameter_m_{0}
+    , length_{0}
     , epsge_{0.000001} {}
 
 
@@ -19,7 +20,7 @@ Curve::Curve(SISLCurve *curve, int dimension, int order)
         s1363(curve_, &startParameter_s_, &endParameter_s_, &statusFlag_);
 
         // Pick curve length.
-        s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);       
+        s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);             
 
         try {
             FromAbsSislToPos(startParameter_s_, startPoint_);
@@ -29,122 +30,65 @@ Curve::Curve(SISLCurve *curve, int dimension, int order)
         }
 
         startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_);
+
+        length_ = std::abs(endParameter_m_ - startParameter_m_);
     }
 
 
-std::shared_ptr<Curve> Curve::ExtractSection(double startValue_m, double endValue_m) {
-
-    if(startValue_m < startParameter_m_)
-        throw std::runtime_error("[Curve::ExtractCurveSection] Input parameter error. startValue_m before startParameter_m_");
-    if(endValue_m > endParameter_m_)
-        throw std::runtime_error("[Curve::ExtractCurveSection] Input parameter error. endValue_m beyond endParameter_m_");
-
-    double startValue{0};
-    double endValue{0};
-
-    try {
-        std::tie(startValue, std::ignore) = MeterAbsToSislAbs(startValue_m);
-        std::tie(endValue, std::ignore) = MeterAbsToSislAbs(endValue_m);
-    } catch(std::runtime_error const& exception) {
-        throw std::runtime_error(std::string{"[Curve::ExtractSection] -> "} + exception.what());
-    }
-        
-    SISLCurve* curveSection;
-    s1712(curve_, startValue, endValue, &curveSection, &statusFlag_);
-
-    auto curveSectionSmart = std::make_shared<Curve>(curveSection);
-    curveSectionSmart->name_ = name_; 
-
-    return curveSectionSmart;
-}
-
-
-std::tuple<double, double> Curve::FindClosestPoint(Eigen::Vector3d& worldF_position) 
+double Curve::SislAbsToMeterAbs(double abscissa_s) 
 {
-
-    double distance{0};
-    double abscissa_s{0};
-    double epsco{0}; // Computational resolution (not used)
-    double abscissa_m{0};
-
-    s1957(curve_, &worldF_position[0], dimension_, epsco, epsge_, &abscissa_s, &distance, &statusFlag_);
-    try {
-        std::tie(abscissa_m, std::ignore) = SislAbsToMeterAbs(abscissa_s);
-    } catch(std::runtime_error const& exception) {
-        throw std::runtime_error(std::string("[Curve::FindClosestPoint] -> ") + exception.what());
+    if(endParameter_s_ > startParameter_s_) {
+        if(abscissa_s < startParameter_s_)
+            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s before startParameter_s_"); 
+        else if (abscissa_s > endParameter_s_)
+            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s beyond endParameter_s_");
     }
-    
-    return std::make_tuple(abscissa_m, distance);
+    else {
+        if(abscissa_s > startParameter_s_)
+            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s before startParameter_s_"); 
+        else if (abscissa_s < endParameter_s_)
+            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s beyond endParameter_s_");
+    }
+ 
+    return abscissa_s * (endParameter_m_ / endParameter_s_);
 }
 
 
-/** FIX: */
-void Curve::EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal)
+double Curve::MeterAbsToSislAbs(double abscissa_m) 
 {
-    if(abscissa_m < startParameter_m_)
-        throw std::runtime_error("[Curve::EvalTangentFrame] Input parameter error. abscissa_m before startParameter_m_");
-    if(abscissa_m > endParameter_m_)
-        throw std::runtime_error("[Curve::EvalTangentFrame] Input parameter error. abscissa_m beyond endParameter_m_");
-
-    std::array<double, 3> worldF_position{ 0 };
-
-    double abscissa_s{};
-    std::tie(abscissa_s, std::ignore) = MeterAbsToSislAbs(abscissa_m);
-
-    s2559(curve_, &abscissa_s, 1, &worldF_position[0], &tangent[0], &normal[0], &binormal[0], &statusFlag_);
-
-    normal = tangent.cross(-Eigen::Vector3d::UnitZ());
-    binormal = tangent.cross(normal);
-}
-
-
-std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCurve) {
-    
-    double epsco{0};
-    int intersectionsNum{0};
-    double * intersectionsFirstCurve; // 
-    double * intersectionsSecondCurve;
-    int numintcu{0};
-    SISLIntcurve **intcurve;
-
-    s1857(curve_, otherCurve->CurvePtr(), epsco, epsge_, &intersectionsNum, &intersectionsFirstCurve, &intersectionsSecondCurve, 
-        &numintcu, &intcurve, &statusFlag_);
-
-    std::vector<Eigen::Vector3d> intersections{};
-    Eigen::Vector3d intersectionPoint;
-
-    for(auto i = 0; i < intersectionsNum; ++i) {
-
-        try {
-            FromAbsSislToPos(intersectionsFirstCurve[i], intersectionPoint);
-        } catch(std::runtime_error const& exception) {
-            throw std::runtime_error(std::string("[Curve::Intersection] -> ") + exception.what());
-        }
-        
-        intersectionPoint[0] = std::round(intersectionPoint[0] * 1000) / 1000;
-        intersectionPoint[1] = std::round(intersectionPoint[1] * 1000) / 1000;
-        intersectionPoint[2] = std::round(intersectionPoint[2] * 1000) / 1000;
-
-        if (std::count(intersections.begin(), intersections.end(), intersectionPoint) == 0) {
-            intersections.push_back(intersectionPoint);
-        }
+    if(endParameter_m_ > startParameter_m_) {
+        if(abscissa_m < startParameter_m_)
+            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m before startParameter_m_"); 
+        else if (abscissa_m > endParameter_m_)
+            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m beyond endParameter_m_");
     }
-
-    return intersections;
+    else {
+        if(abscissa_m > startParameter_m_)
+            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m before startParameter_m_"); 
+        else if (abscissa_m < endParameter_m_)
+            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m beyond endParameter_m_");
+    }
+ 
+    return abscissa_m * (endParameter_s_ / endParameter_m_);
 }
 
 
 void Curve::FromAbsSislToPos(double abscissa_s, Eigen::Vector3d& worldF_position)
 {
-    if(abscissa_s < startParameter_s_)
-        throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s before startParameter_s_");
-    if(abscissa_s > endParameter_s_)
-        throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s beyond endParameter_s_");
-
+    if(endParameter_s_ > startParameter_s_) {
+        if(abscissa_s < startParameter_s_)
+            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s before startParameter_s_"); 
+        else if (abscissa_s > endParameter_s_)
+            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s beyond endParameter_s_");
+    }
+    else {
+        if(abscissa_s > startParameter_s_)
+            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s before startParameter_s_"); 
+        else if (abscissa_s < endParameter_s_)
+            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s beyond endParameter_s_");
+    }
 
     int left{0}; // The SISL routine needs this variable, but it does not use the value.
-    // if(abscissa_s < startParameter_s_) abscissa_s = startParameter_s_;
-    // if(abscissa_s > endParameter_s_) abscissa_s = endParameter_s_;
     
     s1221(curve_, 0, abscissa_s, &left, &worldF_position[0], &statusFlag_);
 }
@@ -152,86 +96,77 @@ void Curve::FromAbsSislToPos(double abscissa_s, Eigen::Vector3d& worldF_position
 
 void Curve::FromAbsMetersToPos(double abscissa_m, Eigen::Vector3d& worldF_position)
 {
-    if(abscissa_m < startParameter_m_)
-        throw std::runtime_error("[Curve::FromAbsMetersToPos] Input parameter error. abscissa_m before startParameter_m_");
-    if(abscissa_m > endParameter_m_)
-        throw std::runtime_error("[Curve::FromAbsMetersToPos] Input parameter error. abscissa_m beyond endParameter_m_");
-
-
-    int left{0}; // The SISL routine needs this variable, but it does not use the value.
-    double abscissa_s{};
-    std::tie(abscissa_s, std::ignore) = MeterAbsToSislAbs(abscissa_m);
+    double abscissa_s{0};
+    try {
+        abscissa_s = MeterAbsToSislAbs(abscissa_m);
+    }
+    catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Curve::FromAbsMetersToPos] -> ") + exception.what());
+    } 
     
+    int left{0}; // The SISL routine needs this variable, but it does not use the value.
+
     s1221(curve_, 0, abscissa_s, &left, &worldF_position[0], &statusFlag_);
 }
 
 
 Eigen::Vector3d Curve::At(double abscissa_m) {
 
-    if(abscissa_m < startParameter_m_)
-        throw std::runtime_error("[Curve::At] Input parameter error. abscissa_m before startParameter_m_");
-    if(abscissa_m > endParameter_m_)
-        throw std::runtime_error("[Curve::At] Input parameter error. abscissa_m beyond endParameter_m_");
-
-
+   
     Eigen::Vector3d worldF_position{};
-    int left{0}; // The SISL routine needs this variable, but it does not use the value.
+    int leftknot{0}; // The SISL routine needs this variable, but it does not use the value.
     double abscissa_s{};
     try {
-        std::tie(abscissa_s, std::ignore) = MeterAbsToSislAbs(abscissa_m);
+        abscissa_s = MeterAbsToSislAbs(abscissa_m);
     } catch(std::runtime_error const& exception) {
-        throw std::runtime_error(std::string("[Curve::Intersection] -> ") + exception.what());
+        throw std::runtime_error(std::string("[Curve::At] -> ") + exception.what());
     }    
     
-    s1221(curve_, 0, abscissa_s, &left, &worldF_position[0], &statusFlag_);
+    s1227(curve_, 0, abscissa_s, &leftknot, &worldF_position[0], &statusFlag_);
 
     return worldF_position;
 }
 
 
-std::tuple<double, overBound> Curve::SislAbsToMeterAbs(double abscissa_s) 
-{
-    if(abscissa_s < startParameter_s_)
-        throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_m before startParameter_s_");
-    if(abscissa_s > endParameter_s_)
-        throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_m beyond endParameter_s_");
+std::vector<Eigen::Vector3d> Curve::Derivate(int order, double abscissa_m) {
 
-    double abscissa_m { abscissa_s * (endParameter_m_ / endParameter_s_) };
-    overBound overBound;
+    std::vector<Eigen::Vector3d> derivates{};
+    std::vector<double> derivatesTmp(order * dimension_, 0);
 
-    // if(abscissa_s < startParameter_s_) {
-    //     overBound.setLower(abscissa_m, startParameter_m_);
-    //     abscissa_m = startParameter_m_;
-    // }
-    // else if(abscissa_s > endParameter_s_) {
-    //     overBound.setUpper(abscissa_m, endParameter_m_);
-    //     abscissa_m = endParameter_m_;
-    // }   
- 
-    return std::make_tuple(abscissa_m, overBound);
+    int leftknot{0}; // The SISL routine needs this variable, but it does not use the value.
+    double abscissa_s{};
+    try {
+        abscissa_s = MeterAbsToSislAbs(abscissa_m);
+    } catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Curve::Derivate] -> ") + exception.what());
+    }    
+
+    s1227(curve_, order, abscissa_s, &leftknot, &derivatesTmp[0], &statusFlag_);
+
+    for(int i = 1; i <= order; ++i) {
+        derivates.emplace_back(Eigen::Vector3d{derivatesTmp[i*3], derivatesTmp[i*3 + 1], derivatesTmp[i*3 + 2]});
+    }
+
+    return derivates;
 }
 
 
-std::tuple<double, overBound> Curve::MeterAbsToSislAbs(double abscissa_m) 
-{
-    if(abscissa_m < startParameter_m_)
-        throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m before startParameter_s_");
-    if(abscissa_m > endParameter_m_)
-        throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m beyond endParameter_s_");
+double Curve::Curvature(double abscissa_m) {
 
-    double abscissa_s { abscissa_m * (endParameter_s_ / endParameter_m_) };
-    overBound overBound;
+    double abscissa_s{0};
+    try {
+        abscissa_s = MeterAbsToSislAbs(abscissa_m);
+    } catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Curve::Curvature] -> ") + exception.what());
+    }
 
-    // if(abscissa_m < startParameter_m_) {
-    //     overBound.setLower(abscissa_m, startParameter_m_);
-    //     abscissa_s = startParameter_s_;
-    // }
-    // else if(abscissa_s > endParameter_s_) {
-    //     overBound.setUpper(abscissa_m, endParameter_m_);
-    //     abscissa_s = endParameter_s_;
-    // }   
- 
-    return std::make_tuple(abscissa_s, overBound);
+    std::array<double, 1> abscissaVector_s{abscissa_s};
+    int parameterNumber{1};
+    std::array<double, 1> curvature{};
+
+    s2550(curve_, &abscissaVector_s[0], parameterNumber, &curvature[0], &statusFlag_);
+
+    return curvature[0];
 }
 
 
@@ -258,4 +193,111 @@ std::shared_ptr<std::vector<Eigen::Vector3d>> Curve::Sampling(int const samples)
     }
     
     return curve;
+}
+
+
+std::tuple<double, double> Curve::FindClosestPoint(Eigen::Vector3d& worldF_position) 
+{
+
+    double distance{0};
+    double abscissa_s{0};
+    double epsco{0}; // Computational resolution (not used)
+    double abscissa_m{0};
+
+    s1957(curve_, &worldF_position[0], dimension_, epsco, epsge_, &abscissa_s, &distance, &statusFlag_);
+    try {
+        abscissa_m = SislAbsToMeterAbs(abscissa_s);
+    } catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Curve::FindClosestPoint] -> ") + exception.what());
+    }
+    
+    return std::make_tuple(abscissa_m, distance);
+}
+
+
+std::shared_ptr<Curve> Curve::ExtractSection(double startValue_m, double endValue_m) {
+
+    double startValue{0};
+    double endValue{0};
+
+    try {
+        startValue = MeterAbsToSislAbs(startValue_m);
+        endValue = MeterAbsToSislAbs(endValue_m);
+    } catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string{"[Curve::ExtractSection] -> "} + exception.what());
+    }
+        
+    SISLCurve* curveSection;
+    s1712(curve_, startValue, endValue, &curveSection, &statusFlag_);
+
+    auto curveSectionSmart = std::make_shared<Curve>(curveSection);
+    curveSectionSmart->name_ = name_; 
+
+    return curveSectionSmart;
+}
+
+
+std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCurve) {
+    
+    double epsco{0};
+    int intersectionsNum{0};
+    double * intersectionsFirstCurve; // 
+    double * intersectionsSecondCurve;
+    int numintcu{0};
+    SISLIntcurve **intcurve;
+
+    std::vector<Eigen::Vector3d> intersections{};
+    Eigen::Vector3d intersectionPoint;
+
+    if(otherCurve->Length() == 0)
+        return intersections;
+
+    s1857(curve_, otherCurve->CurvePtr(), epsco, epsge_, &intersectionsNum, &intersectionsFirstCurve, &intersectionsSecondCurve, 
+        &numintcu, &intcurve, &statusFlag_);
+
+    for(auto i = 0; i < intersectionsNum; ++i) {
+
+        try {
+            FromAbsSislToPos(intersectionsFirstCurve[i], intersectionPoint);
+        } catch(std::runtime_error const& exception) {
+            throw std::runtime_error(std::string("[Curve::Intersection] -> ") + exception.what());
+        }
+        
+        intersectionPoint[0] = std::round(intersectionPoint[0] * 1000) / 1000;
+        intersectionPoint[1] = std::round(intersectionPoint[1] * 1000) / 1000;
+        intersectionPoint[2] = std::round(intersectionPoint[2] * 1000) / 1000;
+
+        if (std::count(intersections.begin(), intersections.end(), intersectionPoint) == 0) {
+            intersections.push_back(intersectionPoint);
+        }
+    }
+
+    return intersections;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** FIX: DA FARE!!! */
+void Curve::EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal)
+{
+    
+    std::array<double, 3> worldF_position{ 0 };
+
+    double abscissa_s{};
+    abscissa_s = MeterAbsToSislAbs(abscissa_m);
+
+    s2559(curve_, &abscissa_s, 1, &worldF_position[0], &tangent[0], &normal[0], &binormal[0], &statusFlag_);
+
+    normal = tangent.cross(-Eigen::Vector3d::UnitZ());
+    binormal = tangent.cross(normal);
 }

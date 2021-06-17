@@ -4,7 +4,7 @@
 #include <iomanip>
 
 
-int main(int argc, char** argv) {
+int main() {
 
     /***************** Path creation *****************/
 
@@ -41,10 +41,10 @@ int main(int argc, char** argv) {
         /***************** Parametrizations mapping *****************/
         
         double absPath_m{10};
-        std::tie(abscissaCurve_m, curveId, std::ignore) = hippodrome->PathAbsToCurveAbs(absPath_m);
+        std::tie(abscissaCurve_m, curveId) = hippodrome->PathAbsToCurveAbs(absPath_m);
         std::cout << std::endl << "Given abscissa path " << absPath_m << ", convert in Curve parametrization -> curveId: " 
             << curveId << ", abscissaCurve_m: " << abscissaCurve_m << std::endl;
-        std::tie(absPath_m, std::ignore) = hippodrome->CurveAbsToPathAbs(abscissaCurve_m, curveId);
+        absPath_m = hippodrome->CurveAbsToPathAbs(abscissaCurve_m, curveId);
         std::cout << "Inverse transformation -> Given curveId " << curveId << " and abscissaCurve_m: " << abscissaCurve_m 
             << " -> , abscissa path: " << absPath_m << std::endl;
 

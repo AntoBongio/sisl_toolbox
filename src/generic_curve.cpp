@@ -25,7 +25,7 @@ GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Ei
 
 
         if(coefficients_.empty()) {
-            for(auto i = 0; i < points_.size(); ++i) {
+            for(std::size_t i = 0; i < points_.size(); ++i) {
                 coefficients_.push_back(points_[i][0] * weights_[i]);
                 coefficients_.push_back(points_[i][1] * weights_[i]);
                 coefficients_.push_back(0);
@@ -45,4 +45,6 @@ GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Ei
         FromAbsSislToPos(endParameter_s_, endPoint_);    
 
         startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_); 
+
+        length_ = std::abs(endParameter_m_ - startParameter_m_);
     }
