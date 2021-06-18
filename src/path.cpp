@@ -203,6 +203,43 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& cu
     return closestPoint;
 }
 
+Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position) {
+
+    Eigen::Vector3d closestPoint{Eigen::Vector3d::Zero()};
+    double distance{0};
+    double minDistance{0};
+    double abscissaTmp_m{0};
+    int curveId{0};
+    double abscissa_m{0};
+
+    for(std::size_t i = 0; i < curves_.size(); ++i) {
+       
+        try {
+            std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
+        } catch(std::runtime_error const& exception) {
+            throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
+        }
+
+        if(minDistance > 0 and distance < minDistance) {
+            minDistance = distance;
+            curveId = i;
+            abscissa_m = abscissaTmp_m;
+        }
+        else if (minDistance == 0){
+            minDistance = distance;
+            curveId = i;
+            abscissa_m = abscissaTmp_m;
+        }
+    }
+    try {
+        curves_[curveId]->FromAbsMetersToPos(abscissa_m, closestPoint);
+    } catch(std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Path::FindClosestPoint] -> ") + exception.what());
+    }
+
+    return closestPoint;
+}
+
 
 std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_m) {
     
@@ -354,28 +391,3 @@ std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Curve> otherCurv
     return intersections;
 }
 
-
-
-
-
-
-std::tuple<double, double, double, double> Path::evalRectangleBoundingBox (std::vector<Eigen::Vector3d> const& polygonVerteces) const {
-        double maxX{polygonVerteces[0][0]}; 
-        double minX{polygonVerteces[0][0]};
-        double maxY{polygonVerteces[0][1]};
-        double minY{polygonVerteces[0][1]};
-        for(std::size_t i = 1; i < polygonVerteces.size(); i++) {
-            if(maxX < polygonVerteces[i][0])
-                maxX = polygonVerteces[i][0];
-            if(minX > polygonVerteces[i][0])
-                minX = polygonVerteces[i][0];   
-
-            if(maxY < polygonVerteces[i][1])
-                maxY = polygonVerteces[i][1];
-            if(minY > polygonVerteces[i][1])
-                minY = polygonVerteces[i][1];  
-        }
-        // Set the vertices precision
-        return std::make_tuple(std::round(maxX * 1000) / 1000, std::round(minX * 1000) / 1000, 
-                               std::round(maxY * 1000) / 1000, std::round(minY * 1000) / 1000);
-    };

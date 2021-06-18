@@ -54,7 +54,7 @@ int main() {
 
         std::ofstream outputIntersection;
         outputIntersection.open ("/home/antonino/Desktop/sisl_toolbox/script/intersectionPoints.txt");
-        auto intersectingCurve = CurveFactory::NewCurve<Circle>(6.28, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{60, 37, 0}, Eigen::Vector3d{50, 35, 0});
+        auto intersectingCurve = std::make_shared<CircularArc>(6.28, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{60, 37, 0}, Eigen::Vector3d{50, 35, 0});
         auto intersectingPath = std::make_shared<Path>();
         intersectingPath->AddCurveBack(intersectingCurve);
         PersistenceManager::SaveObj(intersectingCurve->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/intersectingCurve.txt");

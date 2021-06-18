@@ -32,7 +32,7 @@ add_library(sisl_toolbox SHARED
     src/curve.cpp
     src/generic_curve.cpp
     src/straight_line.cpp
-    src/circle.cpp
+    src/circular_arc.cpp
     src/path.cpp
     src/persistence_manager.cpp
     src/path_factory.cpp
@@ -95,9 +95,9 @@ if(BUILD_TESTS)
     add_executable(test_serpentine test/test_serpentine.cpp)
     target_link_libraries(test_serpentine sisl_toolbox)
 
-    add_executable(test_new_path test/test_new_path.cpp)
-    target_link_libraries(test_new_path sisl_toolbox)
+    add_executable(test_race_track test/test_race_track.cpp)
+    target_link_libraries(test_race_track sisl_toolbox)
 
 
-    add_test(test_hippodrome test_polygon test_spiral test_serpentine test_new_path)
+    add_test(test_hippodrome test_polygon test_spiral test_serpentine test_race_track)
 endif(BUILD_TESTS)

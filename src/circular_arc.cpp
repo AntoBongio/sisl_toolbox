@@ -1,13 +1,13 @@
-#include "sisl_toolbox/circle.hpp"
+#include "sisl_toolbox/circular_arc.hpp"
 #include "sisl.h"
 
-Circle::Circle(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, int dimension, int order) 
+CircularArc::CircularArc(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, int dimension, int order) 
     : Curve(dimension, order)
     , angle_{angle}
     , axis_{axis}
     , centrePoint_{centrePoint}
     {
-        name_ = "Circle";
+        name_ = "Circular Arc";
 
         // Generate a circle according to the parameters (angle, axis, startPoint, centrePoint).
         s1303(&startPoint[0], Epsge(), angle_, &centrePoint_[0], &axis_[0], Dimension(), &curve_, &statusFlag_);

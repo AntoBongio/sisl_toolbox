@@ -1,5 +1,4 @@
-#ifndef CURVE_HPP
-#define CURVE_HPP
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -7,7 +6,6 @@
 #include <vector>
 
 #include <eigen3/Eigen/Dense>
-#include "sisl_toolbox/defines.hpp"
 
 struct SISLCurve; /** Forward declaration */
 class CurveFactory; /** Forward declaration */
@@ -40,11 +38,7 @@ public:
     Curve(SISLCurve * curve, int dimension = 3, int order = 3);
 
     /**
-    * @brief Convert from Sisl parametrization to Meters parametrization. 
-    *       Check if an overbound event happens (w.r.t. both extrema), meaning that the passed abscissa_s is greater than
-    *       the upper limit of the curve parametrization (the one generated automatically by the SISL routines) or is lower
-    *       than the lower one. If such Events happen, abscissa_s is truncated respectively to the endParameter_s_ or to 
-    *       startParamter_s_ and the overBound struct is filled with the exceeding quantity expressed in meters.
+    * @brief Convert from Sisl parametrization to Meters parametrization. If the input abscissa is out of range, an exception is thrown. 
     * @param[in] abscissa_s Starting position (abscissa in Sisl parametrization) of the point.
     * 
     * @return A tuple containing respectively: the abscissa (in meters).
@@ -52,11 +46,7 @@ public:
     double SislAbsToMeterAbs(double abscissa_s);
 
     /**
-    * @brief Convert from Meters parametrization to Sisl parametrization. 
-    *       Check if an overbound event happens (w.r.t. both extrema), meaning that the passed abscissa_m is greater than
-    *       the upper limit of the curve parametrization (the one derived by the automatically generated SISL parametrization
-    *       expressed in meters) or is lower than the lower one. If such Events happen, abscissa_m is truncated respectively 
-    *       to the endParameter_m_ or to startParamter_m_ and the overBound struct is filled with the exceeding quantity expressed in meters.
+    * @brief Convert from Meters parametrization to Sisl parametrization. If the input abscissa is out of range, an exception is thrown.
     * @param[in] abscissa_m Starting position (abscissa in meters parametrization) of the point.
     * 
     * @return A tuple containing respectively: the abscissa (in Sisl parametrization).
@@ -119,7 +109,7 @@ public:
     std::shared_ptr<std::vector<Eigen::Vector3d>> Sampling(int const samples) const;
 
     /**
-    * @brief Find the closest point between a curve and a point. Simple version.
+    * @brief Find the closest point between a curve and a point.
     * @details Find the closest point between a curve and a point. The method is fast and should work well in clear cut cases but does not guarantee 
     * finding the right solution. As long as it doesn’t fail, it will find exactly one point. In other cases, use s1953().
     * @param[in] position The point in the closest point problem.
@@ -218,5 +208,3 @@ protected:
 };
 
 /*** NOTE: mkdir build -> cmake .. -DBUILD_TESTS=ON -> sudo make install ***/
-
-#endif

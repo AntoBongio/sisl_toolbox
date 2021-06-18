@@ -53,7 +53,7 @@ int main() {
 
         std::ofstream outputIntersection;
         outputIntersection.open ("/home/antonino/Desktop/sisl_toolbox/script/intersectionPoints.txt");
-        auto line = CurveFactory::NewCurve<StraightLine>(Eigen::Vector3d{7.5, -2, 0}, Eigen::Vector3d{7.5, 12, 0});
+        auto line = std::make_shared<StraightLine>(Eigen::Vector3d{7.5, -2, 0}, Eigen::Vector3d{7.5, 12, 0});
         auto linePath = std::make_shared<Path>();
         linePath->AddCurveBack(line);
         PersistenceManager::SaveObj(line->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/intersectingCurve.txt");

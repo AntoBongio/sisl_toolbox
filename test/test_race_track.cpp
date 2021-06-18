@@ -6,99 +6,6 @@
 
 int main() {
 
-    /** TEST: Circle test */
-    // try {
-        
-    //     auto circle = std::make_shared<Circle>(6.28, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{10, 10, 0}, Eigen::Vector3d{2, 2, 1});
-
-    //     PersistenceManager::SaveObj(circle->Sampling(1500), "/home/antonino/Desktop/sisl_toolbox/script/path.txt");
-    //     std::cout << "Circle curvature at 15 -> " << circle->Curvature(15) << std::endl;
-
-    //     std::cout << *circle << std::endl;
-
-    //     /***************** Intersection Problem  *****************/
-
-    //     std::ofstream outputIntersection;
-    //     outputIntersection.open ("/home/antonino/Desktop/sisl_toolbox/script/intersectionPoints.txt");
-    //     auto intersectingCurve = std::make_shared<CircularArc>(6.28, Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{8, 8, 0}, Eigen::Vector3d{12, 12, 0});
-    //     PersistenceManager::SaveObj(intersectingCurve->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/intersectingCurve.txt");
-
-    //     auto intersectionPoints = circle->Intersection(intersectingCurve);
-
-    //     std::cout << std::endl << "Given -> " << *intersectingCurve << std::endl;
-    //     std::cout << "The intersection points are:  "<< std::endl;
-
-    //     double counter{1};
-    //     for(auto const & point: intersectionPoints) {
-    //         std::cout << "[" << point[0] << ", " << point[1] << ", " << point[2] << "]" << std::endl;
-    //         outputIntersection << point[0] << " " << point[1] << " " << point[2] << " " << counter++ << "\n";
-    //     }
-    //     outputIntersection.close();
-
-
-    //     /***************** Closest Point Problem  *****************/
-
-    //     Eigen::Vector3d findNearThis{-10, -10, 0};
-    //     double abscissaClosest{0};
-    //     double distance{0};
-    //     int curveIdClosest{0};
-
-    //     try {
-    //         std::tie(abscissaClosest, distance) = circle->FindClosestPoint(findNearThis);
-    //     } 
-    //     catch (std::runtime_error const& exception) {
-    //         std::cout << "Exception -> " << exception.what() << std::endl;
-    //     }
-    //     Eigen::Vector3d closestPoint{circle->At(abscissaClosest)};
-
-    //     std::cout << std::endl << "Starting from point [" << findNearThis[0] << ", " << findNearThis[1] << ", " << findNearThis[2] << "]"
-    //         << " the closest point on the path is [" << closestPoint[0] << ", " << closestPoint[1] << ", " << closestPoint[2] << "]" << std::endl;
-        
-    //     std::ofstream outputFile;
-    //     outputFile.open ("/home/antonino/Desktop/sisl_toolbox/script/closestPoint.txt");
-    //     outputFile << "FindNear " << findNearThis[0] << " " << findNearThis[1] << " " << findNearThis[2] << "\n";
-    //     outputFile << "ClosestPoint " << closestPoint[0] << " " << closestPoint[1] << " " << closestPoint[2] << "\n";
-    //     outputFile.close();
-
-
-    //     /***************** Move Point Problem  *****************/
-
-    //     double abscissaStartPoint{3};
-    //     double offset{10};
-    //     std::ofstream outputFile2;
-    //     outputFile2.open ("/home/antonino/Desktop/sisl_toolbox/script/movePoint.txt"); 
-
-    //     auto startPoint = circle->At(abscissaStartPoint);
-    //     std::cout << std::endl << "Point at abscissa: " << abscissaStartPoint << " is [" << startPoint[0] << ", " 
-    //         << startPoint[1] << ", " << startPoint[2] << "]" << std::endl;
-    //     outputFile2 << abscissaStartPoint << " " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
-        
-    //     abscissaStartPoint += offset;
-    //     startPoint = circle->At(abscissaStartPoint);
-    //     std::cout << "Moved at abscissa: " << abscissaStartPoint << " -> [" << startPoint[0] << ", " 
-    //         << startPoint[1] << ", " << startPoint[2] << "]" << std::endl;
-    //     outputFile2 << abscissaStartPoint << " " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
-
-    //     outputFile2.close();
-
-
-    //     /***************** Extract Path Section Problem  *****************/
-
-    //     std::shared_ptr<Curve> circleSection;
-    //     try {
-    //         circleSection = circle->ExtractSection(2, 20);
-    //     } 
-    //     catch (std::runtime_error const& exception) {
-    //         std::cout << "Exception -> " << exception.what() << std::endl;
-    //     }
-            
-    //     if(circleSection)
-    //         PersistenceManager::SaveObj(circleSection->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/pathSection.txt");
-    // }
-    // catch(std::runtime_error const& exception) {
-    //     std::cout << "Received exception from --> " << exception.what() << std::endl;
-    // }
-
 
     /***************** Path creation *****************/
     // unsync the I/O of C and C++.
@@ -121,17 +28,28 @@ int main() {
         polygonVerteces[i][2] = 0;
     }
 
-    double angle{150.0}; 
-    double offsetPath{30.0};
+    // std::vector<Eigen::Vector3d> polygonVerteces2 {
+    //     Eigen::Vector3d {-78, 44, 0}, Eigen::Vector3d {-47, 99, 0}, Eigen::Vector3d {46, 80, 0}, 
+    //     Eigen::Vector3d {79, -43, 0}, Eigen::Vector3d {-23, -99, 0}, Eigen::Vector3d{-110, -71, 0} };
 
-    std::shared_ptr<Path> serpentine;
+
+    double angle{360.0}; 
+    double offsetPath{20.0};
+    double firstRadius {36.0};
+    double secondRadius {17.0};
+    int direction{RIGHT};
+
+    std::shared_ptr<Path> raceTrack;
 
     try {
         auto start = std::chrono::high_resolution_clock::now();
-        serpentine = PathFactory::NewSerpentine(angle, RIGHT, offsetPath, polygonVerteces);
+        raceTrack = PathFactory::NewRaceTrack(angle, direction,  firstRadius, secondRadius, polygonVerteces);
         auto end = std::chrono::high_resolution_clock::now();
 
-        std::cout << *serpentine << std::endl;
+        auto polygon = PathFactory::NewPolygon(polygonVerteces);
+        PersistenceManager::SaveObj(polygon->Sampling(100), "/home/antonino/Desktop/sisl_toolbox/script/polygon.txt");
+
+        std::cout << *raceTrack << std::endl;
 
         // Calculating total time taken by the program.
         double time_taken = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
@@ -139,24 +57,24 @@ int main() {
         std::cout << "Time taken to build the Path object : " << std::fixed << std::setprecision(9) << time_taken  << " sec" << std::endl;
         std::cout << std::fixed << std::setprecision(3); 
 
-        PersistenceManager::SaveObj(serpentine->Sampling(1500), "/home/antonino/Desktop/sisl_toolbox/script/path.txt");
+        PersistenceManager::SaveObj(raceTrack->Sampling(1500), "/home/antonino/Desktop/sisl_toolbox/script/path.txt");
 
         double abscissaCurve_m{0};
         int curveId{0};
 
-        // std::cout << std::endl << serpentine->Name() << " is composed by: " << std::endl;
-        // for(int i = 0; i < serpentine->CurvesNumber(); ++i) {
-        //     std::cout << i << ". " << *serpentine->Curves()[i] << std::endl;
+        // std::cout << std::endl << raceTrack->Name() << " is composed by: " << std::endl;
+        // for(int i = 0; i < raceTrack->CurvesNumber(); ++i) {
+        //     std::cout << i << ". " << *raceTrack->Curves()[i] << std::endl;
         // }
 
 
         /***************** Parametrizations mapping *****************/
         
         double absPath_m{10};
-        std::tie(abscissaCurve_m, curveId) = serpentine->PathAbsToCurveAbs(absPath_m);
+        std::tie(abscissaCurve_m, curveId) = raceTrack->PathAbsToCurveAbs(absPath_m);
         std::cout << std::endl << "Given abscissa path " << absPath_m << ", convert in Curve parametrization -> curveId: " 
             << curveId << ", abscissaCurve_m: " << abscissaCurve_m << std::endl;
-        absPath_m = serpentine->CurveAbsToPathAbs(abscissaCurve_m, curveId);
+        absPath_m = raceTrack->CurveAbsToPathAbs(abscissaCurve_m, curveId);
         std::cout << "Inverse transformation -> Given curveId " << curveId << " and abscissaCurve_m: " << abscissaCurve_m 
             << " -> , abscissa path: " << absPath_m << std::endl;
 
@@ -170,7 +88,7 @@ int main() {
         intersectingPath->AddCurveBack(intersectingCurve);
         PersistenceManager::SaveObj(intersectingCurve->Sampling(200), "/home/antonino/Desktop/sisl_toolbox/script/intersectingCurve.txt");
 
-        auto intersectionPoints = serpentine->Intersection(intersectingPath);
+        auto intersectionPoints = raceTrack->Intersection(intersectingPath);
 
         std::cout << std::endl << "Given -> " << *intersectingCurve << std::endl;
         std::cout << "The intersection points are:  "<< std::endl;
@@ -191,7 +109,7 @@ int main() {
 
         Eigen::Vector3d closestPoint{};
         try {
-            closestPoint = serpentine->FindClosestPoint(findNearThis, curveIdClosest, abscissaClosest);
+            closestPoint = raceTrack->FindClosestPoint(findNearThis, curveIdClosest, abscissaClosest);
         } 
         catch (std::runtime_error const& exception) {
             std::cout << "Exception -> " << exception.what() << std::endl;
@@ -214,13 +132,13 @@ int main() {
         std::ofstream outputFile2;
         outputFile2.open ("/home/antonino/Desktop/sisl_toolbox/script/movePoint.txt"); 
 
-        auto startPoint = serpentine->At(abscissaStartPoint);
+        auto startPoint = raceTrack->At(abscissaStartPoint);
         std::cout << std::endl << "Point at abscissa: " << abscissaStartPoint << " is [" << startPoint[0] << ", " 
             << startPoint[1] << ", " << startPoint[2] << "]" << std::endl;
         outputFile2 << abscissaStartPoint << " " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
         
         abscissaStartPoint += offset;
-        startPoint = serpentine->At(abscissaStartPoint);
+        startPoint = raceTrack->At(abscissaStartPoint);
         std::cout << "Moved at abscissa: " << abscissaStartPoint << " -> [" << startPoint[0] << ", " 
             << startPoint[1] << ", " << startPoint[2] << "]" << std::endl;
         outputFile2 << abscissaStartPoint << " " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
@@ -232,7 +150,7 @@ int main() {
 
         std::shared_ptr<Path> pathSection;
         try {
-            pathSection = serpentine->ExtractSection(300, 700);
+            pathSection = raceTrack->ExtractSection(300, 700);
         } 
         catch (std::runtime_error const& exception) {
             std::cout << "Exception -> " << exception.what() << std::endl;
@@ -247,8 +165,8 @@ int main() {
         std::vector<Eigen::Vector3d> derivatives;
         double curvature;
         try {
-            derivatives = serpentine->Derivate(2, 300);
-            curvature = serpentine->Curvature(400);
+            derivatives = raceTrack->Derivate(2, 300);
+            curvature = raceTrack->Curvature(400);
         } 
         catch (std::runtime_error const& exception) {
             std::cout << "Exception -> " << exception.what() << std::endl;

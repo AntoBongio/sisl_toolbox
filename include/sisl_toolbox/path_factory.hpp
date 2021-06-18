@@ -6,12 +6,8 @@
 #include <eigen3/Eigen/Dense>
 
 
-
-#include <sisl_toolbox/defines.hpp>
-
-
-/** MOMENTANEO: */ 
-#include "sisl_toolbox/persistence_manager.hpp"
+#define RIGHT 1
+#define LEFT 2
 
 class Path;
 
@@ -22,9 +18,9 @@ public:
     static std::shared_ptr<Path> NewHippodrome(std::vector<Eigen::Vector3d> points);
     static std::shared_ptr<Path> NewPolygon(std::vector<Eigen::Vector3d> points);
     static std::shared_ptr<Path> NewSpiral(Eigen::Vector3d centrePoint, Eigen::Vector3d startPoint, double radiusOffset);
-    static std::shared_ptr<Path> NewSerpentine(double angle, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
-
-    static std::shared_ptr<Path> NewNewPath(double angle, int direction, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
+    static std::shared_ptr<Path> NewSerpentine(double angle, int direction, double offset, std::vector<Eigen::Vector3d>& polygonVerteces);
+    static std::shared_ptr<Path> NewRaceTrack(double angle, int direction, double firstRadius, double secondRadius, 
+                                            std::vector<Eigen::Vector3d>& polygonVerteces);
 
 private: 
     /** 
@@ -88,7 +84,7 @@ private:
      * 
      * @return Angle in radians
      */ 
-    static auto FromDegToRad (double angle) {
+    static auto DegToRad (double angle) {
         return angle * M_PI / 180.0;
     };
 

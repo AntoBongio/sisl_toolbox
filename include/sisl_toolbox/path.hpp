@@ -7,12 +7,9 @@
 #include <map>
 #include <eigen3/Eigen/Dense>
 
-#include "sisl_toolbox/defines.hpp" 
 
 class PathFactory;
 class Curve;
-
-/** TODO: Fare forward declaration delle classi ed includerle nel .cpp ? */
 
 /**
  * @class Path
@@ -28,7 +25,7 @@ public:
     /**
      * @brief Add a curve back
      * 
-     * @param curve std::shared_ptr<T> with T in (StraightLine, Circle, GenericCurve). The curve to be added.
+     * @param curve std::shared_ptr<T> with T in (StraightLine, CircularArc, GenericCurve). The curve to be added.
      */
     template <typename T>
     void AddCurveBack(std::shared_ptr<T> curve) {
@@ -55,7 +52,7 @@ public:
      * @param[in] abscissaCurve_m Curve abscissa value.
      * @param[in] curveId Identifier for the curve.
      *  
-     * @return A tuple containing respectively: abscissa of the path
+     * @return The abscissa of the path.
      */
     double CurveAbsToPathAbs(double abscissaCurve_m, int curveId);
 
@@ -88,7 +85,8 @@ public:
     double Curvature(double abscissa_m);
 
     /**
-     * @brief 
+     * @brief Sampling the path. The total points are equally distributed among the curves, without keeping into account 
+     *        the length of each curve.
      * 
      * @param samples
      * 
@@ -102,7 +100,7 @@ public:
     void Reverse();
     
     /**
-     * @brief Find Closest Point w.r.t. the path
+     * @brief Find Closest Point w.r.t. the path.
      * 
      * @param[in] worldF_position point in the find closest point problem.
      * @param[out] curveId Id of the curve containing the closest point.
@@ -111,6 +109,17 @@ public:
      * @return An Eigen::Vector3d representing the closest point.
      */
     Eigen::Vector3d FindClosestPoint(Eigen::Vector3d& worldF_position, int& curveId, double& abscissa_m);    
+
+    /**
+     * @brief Find Closest Point w.r.t. the path. This overloaded version does not give back, filing the arguments,
+     *        the abscissa_m and curveID of the curve where the point lies.  
+     * 
+     * @param[in] worldF_position point in the find closest point problem.
+     *  
+     * @return An Eigen::Vector3d representing the closest point.
+     */
+    Eigen::Vector3d FindClosestPoint(Eigen::Vector3d& worldF_position);  
+
 
     /**
      * @brief Extract a path portion given as input the start/end values.
@@ -141,6 +150,13 @@ public:
      */
     std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Path> otherPath);  
 
+    /**
+     * @brief Eval intersections among curve passed as argument and the current path.
+     * 
+     * @param[in] otherCurve shared_ptr to the curve.
+     *  
+     * @return std::vector<Eigen::Vector3d> contaning the intersection points.
+     */
     std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
 
     // Define [] operator
@@ -186,38 +202,6 @@ private:
     double endParameter_m_;
     std::string name_{};
 
-    /** 
-     * @brief Convert an angle in degrees to [0, 360.0) interval
-     * 
-     * @param[in] angle The angle to be converted passed by copy
-     * 
-     * @return The along curve distance in meters from the stating point of the curve to abscissa parameter.
-     */ 
-    auto convertToAngleInterval (double angle) const {
-        while(angle < 0) { angle += 360.0; }
-        return std::fmod(angle, 360.0);
-    };
-
-    /** 
-     * @brief Given the vertices of a polygon, compute the rectangle surrounding the figure (with 3 decimals precision).
-     * 
-     * @param[in] polygonVerteces const reference to the vector containing polygon's vertices
-     * 
-     * @return A tuple with: (maxX, minX, maxY, minY)
-     */ 
-    std::tuple<double, double, double, double> evalRectangleBoundingBox (std::vector<Eigen::Vector3d> const& polygonVerteces) const;
-
-    /** 
-     * @brief Compute distance between two points
-     * 
-     * @param[in] vec1 First point expresed as Eigen::Vector3d
-     * @param[in] vec2 Second point expresed as Eigen::Vector3d
-     * 
-     * @return Distance between two points
-     */ 
-    auto Distance (Eigen::Vector3d const& vec1, Eigen::Vector3d const& vec2) {
-        return std::sqrt(std::pow(vec1[0] - vec2[0], 2) + std::pow(vec1[1] - vec2[1], 2) + std::pow(vec1[2] - vec2[2], 2));
-    };
 
 };
 

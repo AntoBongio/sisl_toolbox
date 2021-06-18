@@ -87,9 +87,9 @@ plt.ylabel("x")
 x = data[1]
 y = data[0]
 
-#ax.plot(x, y, 'blue', label='Path')
-#ax.scatter3D(x[0], y[0], z[0], 'yellow', label='Start point')
-#ax.scatter3D(x.iloc[-1], y.iloc[-1], z.iloc[-1], 'red', label='Last point')
+ax.plot(x, y, 'blue', label='Path')
+#ax.scatter(x[0], y[0], 'yellow', label='Start point')
+#ax.scatter(x.iloc[-1], y.iloc[-1], 'red', label='Last point')
 ax.plot(xPolygon, yPolygon, 'red', label='Polygon')
 ax.plot(xRectangle, yRectangle, 'blue', label='Rectangle')
 

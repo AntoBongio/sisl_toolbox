@@ -2,7 +2,7 @@
 
 #include "sisl_toolbox/curve.hpp"
 
-class Circle : public Curve{
+class CircularArc : public Curve{
 
 public:
 
@@ -17,7 +17,7 @@ public:
      * @param dimension Parameter used in Curve constructor -> default = 3
      * @param order Parameter used in Curve constructor -> default = 3
      */
-    Circle(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, int dimension = 3, int order = 3);
+    CircularArc(double angle, Eigen::Vector3d axis, Eigen::Vector3d startPoint, Eigen::Vector3d centrePoint, int dimension = 3, int order = 3);
     
 
     // Getter / Setter methods
@@ -30,6 +30,4 @@ private:
     double angle_;
     Eigen::Vector3d axis_;
     Eigen::Vector3d centrePoint_;
-
-
 };
