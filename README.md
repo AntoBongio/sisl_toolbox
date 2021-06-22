@@ -8,8 +8,7 @@ Its major features are:
 
 2. Definition of a **Path** class to build a complex path starting from the Curve objects. The path is parametrized in meters with abscissa in the interval [0, pathLength].
 
-3. Definition of a **PathFactory** class implementing the logic to automatically build different paths: [Polygonal Chain, Polygon, Hippodrome, Spiral, Race Track, Spiral]. Each Method returns a shared_ptr<Path> pointing to an object representing the specific one requested.
-
+3. Definition of a **PathFactory** class implementing the logic to automatically build different paths: [Polygonal Chain, Polygon, Hippodrome, Spiral, Race Track, Serpentine]. Each Method returns a shared_ptr **Path**.
 ## Dependencies
 Before building the repository you will have to install the following dependencies:
 * Eigen 3: `sudo apt install libeigen3-dev`
