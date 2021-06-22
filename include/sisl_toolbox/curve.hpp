@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <memory>
-#include <fstream>
 #include <vector>
 
 #include <eigen3/Eigen/Dense>
@@ -38,25 +37,25 @@ public:
     Curve(SISLCurve * curve, int dimension = 3, int order = 3);
 
     /**
-    * @brief Convert from Sisl parametrization to Meters parametrization. If the input abscissa is out of range, an exception is thrown. 
-    * @param[in] abscissa_s Starting position (abscissa in Sisl parametrization) of the point.
+    * @brief Convert from Sisl parametrization to meters parametrization. If the input abscissa is out of range, an exception is thrown. 
+    * @param[in] abscissa_s Starting position (Sisl parametrization) of the point.
     * 
-    * @return A tuple containing respectively: the abscissa (in meters).
+    * @return The abscissa (in meters parametrization).
     */
     double SislAbsToMeterAbs(double abscissa_s);
 
     /**
-    * @brief Convert from Meters parametrization to Sisl parametrization. If the input abscissa is out of range, an exception is thrown.
-    * @param[in] abscissa_m Starting position (abscissa in meters parametrization) of the point.
+    * @brief Convert from meters parametrization to Sisl parametrization. If the input abscissa is out of range, an exception is thrown.
+    * @param[in] abscissa_m Starting position (meters parametrization) of the point.
     * 
-    * @return A tuple containing respectively: the abscissa (in Sisl parametrization).
+    * @return The abscissa (in Sisl parametrization).
     */
     double MeterAbsToSislAbs(double abscissa_m); 
 
     /**
-    * @brief Convert an abscissa value (in Sisl) to a position in world frame.
+    * @brief Convert an abscissa value (Sisl parametrization) to a position in world frame.
     * @param[in] abscissa_s Abscissa to compute the position.
-    * @param[out] worldF_position Eigen::Vector3d& containing the position.
+    * @param[out] worldF_position Used as output parameter to store the position.
     */
     void FromAbsSislToPos(double abscissa_s, Eigen::Vector3d& worldF_position);
 
@@ -70,7 +69,7 @@ public:
     /**
      * @brief Given an abscissa in meters return the corresponding point on the curve.
      * 
-     * @param[in] abscissa_m abscissa on the curve in meters.
+     * @param[in] abscissa_m Abscissa on the curve (in meters).
      *  
      * @return Eigen::Vector3d containing the point at abscissa_m.
      */
@@ -79,19 +78,19 @@ public:
     /**
      * @brief Given an abscissa in meters return the derivatives up to the n-th one at abscissa_m point.
      * 
-     * @param[in] order evaluate the derivatives from order 1 up to order.
-     * @param[in] abscissa_m abscissa on the curve in meters.
+     * @param[in] order Evaluate the derivatives from 1 up to order.
+     * @param[in] abscissa_m Abscissa on the curve (in meters).
      *  
-     * @return Eigen::Vector3d containing the point at abscissa_m.
+     * @return std::vector of Eigen::Vector3d containing the point at abscissa_m.
      */
     std::vector<Eigen::Vector3d> Derivate(int order, double abscissa_m);
 
     /**
      * @brief Evaluate the curvature of the curve at a given parameter value.
      * 
-     * @param[in] abscissa_m abscissa on the curve in meters
+     * @param[in] abscissa_m Abscissa on the curve (in meters).
      * 
-     * @return curvature value
+     * @return Curvature value.
      */ 
     double Curvature(double abscissa_m);
     
@@ -110,23 +109,22 @@ public:
 
     /**
     * @brief Find the closest point between a curve and a point.
-    * @details Find the closest point between a curve and a point. The method is fast and should work well in clear cut cases but does not guarantee 
-    * finding the right solution. As long as it doesn’t fail, it will find exactly one point. In other cases, use s1953().
+    * 
     * @param[in] position The point in the closest point problem.
     * 
     * @return A tuple (double, double) containing as first element the abscissa_m (in meters) of the on curve point solution of 
-    * the closest point problem. * The second element is the distance between the point passed as argument (worldF_position) 
+    * the closest point problem. The second element is the distance between the point passed as argument (worldF_position) 
     * and the point on curve solution of the closest point problem.
     */
     std::tuple<double, double> FindClosestPoint(Eigen::Vector3d& worldF_position);
 
     /**
-    * @brief Pick a part of a curve.
-    * @details It extracts a new curve from the stating one according to the abscissa startValue and endValue.
+    * @brief Pick a part of a curve. It extracts a new curve from the stating one according to the abscissa startValue and endValue.
+    *  
     * @param[in] startValue_m Start parameter value of the part curve to be picked (in meters).
     * @param[in] endValue_m End parameter value of the part curve to be picked (in meters).
     * 
-    * @return A shared ptr to the curve object.
+    * @return A shared ptr to the new Curve object.
     */
     std::shared_ptr<Curve> ExtractSection(double startValue_m, double endValue_m);
 

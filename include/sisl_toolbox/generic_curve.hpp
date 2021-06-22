@@ -5,7 +5,11 @@
 
 #include "sisl_toolbox/curve.hpp"
 
-
+/**
+ * @class GenericCurve
+ *
+ * @brief Class derived from Curve. It adds a specific constructor for Generic Curve Curve objects as well as the specific getters. 
+ */
 class GenericCurve : public Curve{
 
 public:

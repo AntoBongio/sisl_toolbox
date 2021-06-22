@@ -2,12 +2,17 @@
 
 #include "sisl_toolbox/curve.hpp"
 
+/**
+ * @class StraightLine
+ *
+ * @brief Class derived from Curve. It adds a specific constructor for Straight Line Curve objects as well as the specific getters. 
+ */
 class StraightLine : public Curve{
 
 public:
 
     /** 
-     * @brief StraightLine constructor based on s1602() SISL routine.
+     * @brief Straight Line constructor based on s1602() SISL routine.
      * 
      * @param startPoint Start point of the straight line.
      * @param endPoint End point of the straight line.

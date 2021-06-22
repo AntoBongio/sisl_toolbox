@@ -1,7 +1,6 @@
 #include <iostream>
 #include <memory>
 #include <eigen3/Eigen/Dense>
-#include <ctrl_toolbox/HelperFunctions.h>
 
 #include <jsoncpp/json/json.h>
 #include <chrono>

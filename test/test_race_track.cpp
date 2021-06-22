@@ -11,26 +11,9 @@ int main() {
     // unsync the I/O of C and C++.
     std::ios_base::sync_with_stdio(false);
 
-    ctb::LatLong centroid{44.39173292288923, 8.945241571195552};
-
-    std::vector<ctb::LatLong> pointLatLong {
-        ctb::LatLong(44.39103097698746, 8.94579379703305) , 
-        ctb::LatLong(44.39130994954367, 8.946484085232179) ,
-        ctb::LatLong(44.3921468857443, 8.946245637251524) , 
-        ctb::LatLong(44.39244386538219, 8.94470188296125) ,
-        ctb::LatLong(44.3915259324859, 8.943999052589279) ,
-        ctb::LatLong(44.39074299756334, 8.94435048387282)};
-
-
-    std::vector<Eigen::Vector3d> polygonVerteces(pointLatLong.size(), Eigen::Vector3d::Zero());
-    for(std::size_t i = 0; i < polygonVerteces.size(); i++) {
-        ctb::LatLong2LocalNED(pointLatLong[i], 0.0, centroid, polygonVerteces[i]);
-        polygonVerteces[i][2] = 0;
-    }
-
-    // std::vector<Eigen::Vector3d> polygonVerteces2 {
-    //     Eigen::Vector3d {-78, 44, 0}, Eigen::Vector3d {-47, 99, 0}, Eigen::Vector3d {46, 80, 0}, 
-    //     Eigen::Vector3d {79, -43, 0}, Eigen::Vector3d {-23, -99, 0}, Eigen::Vector3d{-110, -71, 0} };
+    std::vector<Eigen::Vector3d> polygonVerteces {
+        Eigen::Vector3d {-78, 44, 0}, Eigen::Vector3d {-47, 99, 0}, Eigen::Vector3d {46, 80, 0}, 
+        Eigen::Vector3d {79, -43, 0}, Eigen::Vector3d {-23, -99, 0}, Eigen::Vector3d{-110, -71, 0} };
 
 
     double angle{360.0}; 

@@ -111,7 +111,7 @@ int main() {
 
         /***************** Extract Path Section Problem  *****************/
 
-        auto pathSection = hippodrome->ExtractSection(5, 50);
+        auto pathSection = hippodrome->ExtractSection(5, 10);
         PersistenceManager::SaveObj(pathSection->Sampling(100), "/home/antonino/Desktop/sisl_toolbox/script/pathSection.txt");
     
     } catch(std::runtime_error const& exception) {

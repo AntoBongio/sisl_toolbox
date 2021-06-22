@@ -39,7 +39,7 @@ add_library(sisl_toolbox SHARED
 )
 
 
-target_link_libraries(sisl_toolbox sisl Geographic)
+target_link_libraries(sisl_toolbox sisl)
 
 set_target_properties(sisl_toolbox PROPERTIES LINKER_LANGUAGE CXX)
 

@@ -7,15 +7,14 @@
 #include <map>
 #include <eigen3/Eigen/Dense>
 
-
 class PathFactory;
 class Curve;
 
 /**
  * @class Path
  *
- * @brief 
- *
+ * @brief This class is used to build a complex path starting from the Curve objects. The path is parametrized in meters 
+ *        with abscissa in the interval [0, pathLength].
  */
 class Path {
 
@@ -41,13 +40,13 @@ public:
      * 
      * @param[in] abscissa_m Path abscissa value.
      *  
-     * @return A tuple containing respectively: abscissa of the curve, the curveId.
+     * @return A tuple containing respectively: abscissa of the curve, curve Id.
      */
     std::tuple<double, int> PathAbsToCurveAbs(double abscissa_m);
 
     /**
-     * @brief Convert from Abscissa curve parameter to Abscissa path parameter. If the abscissaCurve_m is beyond of before the 
-     * curve parametrization extrema.
+     * @brief Convert from Abscissa curve parameter to Abscissa path parameter. If the abscissaCurve_m is beyond or before the 
+     * curve parametrization extrema, an exception is thrown.
      * 
      * @param[in] abscissaCurve_m Curve abscissa value.
      * @param[in] curveId Identifier for the curve.
@@ -57,9 +56,9 @@ public:
     double CurveAbsToPathAbs(double abscissaCurve_m, int curveId);
 
     /**
-     * @brief Given an abscissa in meters return the corresponding point on path.
+     * @brief Given an abscissa return the corresponding point on path.
      * 
-     * @param[in] abscissa_m abscissa on the path in meters.
+     * @param[in] abscissa_m abscissa on the path (in meters).
      *  
      * @return Eigen::Vector3d containing the point at abscissa_m.
      */
@@ -68,10 +67,10 @@ public:
     /**
      * @brief Given an abscissa in meters return the derivatives up to the n-th one at abscissa_m point.
      * 
-     * @param[in] order evaluate the derivatives from order 1 up to order.
+     * @param[in] order evaluate the derivatives from 1 up to order.
      * @param[in] abscissa_m abscissa on the curve in meters.
      *  
-     * @return Eigen::Vector3d containing the point at abscissa_m.
+     * @return std::vector<Eigen::Vector3d> containing the point at abscissa_m.
      */
     std::vector<Eigen::Vector3d> Derivate(int order, double abscissa_m);
 

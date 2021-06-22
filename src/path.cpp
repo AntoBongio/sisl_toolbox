@@ -169,13 +169,6 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& cu
     double abscissaTmp_m{0};
 
     for(std::size_t i = 0; i < curves_.size(); ++i) {
-
-        // try {
-        //     std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
-        // } catch (const char* exception) {
-        //     throw exception;
-        // }
-        
         
         try {
             std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
@@ -249,13 +242,9 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
 
     if(startValue_m < startParameter_m_){
         throw std::runtime_error("[Path::ExtractSection] Input parameter error. startValue_m before startParameter_m_");
-        // std::cout << "Received an incorrect starting value! Fixing.." << std::endl;
-        // startValue_m = startParameter_m_;
     }
     if(endValue_m > endParameter_m_) {
         throw std::runtime_error("[Path::ExtractSection] Input parameter error. endValue_m beyond endParameter_m_");
-        // std::cout << "Received an incorrect ending value! Fixing.." << std::endl;
-        // endValue_m = endParameter_m_;
     }
 
     double portionLength{endValue_m - startValue_m};

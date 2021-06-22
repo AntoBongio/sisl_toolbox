@@ -2,17 +2,22 @@
 
 #include "sisl_toolbox/curve.hpp"
 
+/**
+ * @class CircularArc
+ *
+ * @brief Class derived from Curve. It adds a specific constructor for Circular Arc Curve objects as well as the specific getters. 
+ */
 class CircularArc : public Curve{
 
 public:
 
     /** 
-     * @brief Circle constructor based on s1303() SISL routine.
+     * @brief Circular Arc constructor based on s1303() SISL routine.
      * 
-     * @param angle The rotational angle. Counterclockwise around axis. If the rotational angle is outside <−2π, +2π> then a closed curve is produced.
-     * @param axis Normal vector to plane in which the circle lies. Used if dim = 3.
-     * @param startPoint Start point of the circular arc
-     * @param centrePoint Point on the axis of the circle.
+     * @param angle The rotational angle (in rad). Counterclockwise around axis. If the rotational angle is outside <−2π, +2π> then a closed curve is produced.
+     * @param axis Normal vector to plane in which the circle lies.
+     * @param startPoint Start point of the circular arc.
+     * @param centrePoint Centre point of the circular arc.
      * 
      * @param dimension Parameter used in Curve constructor -> default = 3
      * @param order Parameter used in Curve constructor -> default = 3

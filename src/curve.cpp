@@ -37,7 +37,7 @@ Curve::Curve(SISLCurve *curve, int dimension, int order)
 
 double Curve::SislAbsToMeterAbs(double abscissa_s) 
 {
-    if(endParameter_s_ > startParameter_s_) {
+    if(endParameter_s_ >= startParameter_s_) {
         if(abscissa_s < startParameter_s_)
             throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s before startParameter_s_"); 
         else if (abscissa_s > endParameter_s_)
@@ -45,9 +45,9 @@ double Curve::SislAbsToMeterAbs(double abscissa_s)
     }
     else {
         if(abscissa_s > startParameter_s_)
-            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s before startParameter_s_"); 
+            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s beyond startParameter_s_"); 
         else if (abscissa_s < endParameter_s_)
-            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s beyond endParameter_s_");
+            throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s before endParameter_s_");
     }
  
     return abscissa_s * (endParameter_m_ / endParameter_s_);
@@ -64,9 +64,9 @@ double Curve::MeterAbsToSislAbs(double abscissa_m)
     }
     else {
         if(abscissa_m > startParameter_m_)
-            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m before startParameter_m_"); 
+            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m beyond startParameter_m_"); 
         else if (abscissa_m < endParameter_m_)
-            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m beyond endParameter_m_");
+            throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m before endParameter_m_");
     }
  
     return abscissa_m * (endParameter_s_ / endParameter_m_);
@@ -83,9 +83,9 @@ void Curve::FromAbsSislToPos(double abscissa_s, Eigen::Vector3d& worldF_position
     }
     else {
         if(abscissa_s > startParameter_s_)
-            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s before startParameter_s_"); 
+            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s beyond startParameter_s_"); 
         else if (abscissa_s < endParameter_s_)
-            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s beyond endParameter_s_");
+            throw std::runtime_error("[Curve::FromAbsSislToPos] Input parameter error. abscissa_s before endParameter_s_");
     }
 
     int left{0}; // The SISL routine needs this variable, but it does not use the value.
@@ -112,7 +112,6 @@ void Curve::FromAbsMetersToPos(double abscissa_m, Eigen::Vector3d& worldF_positi
 
 Eigen::Vector3d Curve::At(double abscissa_m) {
 
-   
     Eigen::Vector3d worldF_position{};
     int leftknot{0}; // The SISL routine needs this variable, but it does not use the value.
     double abscissa_s{};
