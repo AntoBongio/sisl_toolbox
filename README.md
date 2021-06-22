@@ -1,17 +1,19 @@
 # SISL Toolbox
 The **SISL Toolbox** library is built on top of *SISL* library.
 
-## Documentation
-
 ## Features
+Its major features are:
 
+1. Definition of a class **Curve** to wrap the SISL (SINTEF Spline Library) routines of the library. Moreover, this class adds an in meters curve parametrization, internally applying a conversion from meters parametrization to Sisl parametrization.
+
+2. Definition of a **Path** class to build a complex path starting from the Curve objects. The path is parametrized in meters with abscissa in the interval [0, pathLength].
+
+3. Definition of a **PathFactory** class implementing the logic to automatically build different paths: [Polygonal Chain, Polygon, Hippodrome, Spiral, Race Track, Spiral]. Each Method returns a shared_ptr<Path> pointing to an object representing the specific one requested.
 
 ## Dependencies
 Before building the repository you will have to install the following dependencies:
 * Eigen 3: `sudo apt install libeigen3-dev`
 * SISL: `git clone https://github.com/SINTEF-Geometry/SISL.git`
-* Geographic Library 'sudo apt-get install -y libgeographic-dev'
-
 
 ## Building and installing
 
