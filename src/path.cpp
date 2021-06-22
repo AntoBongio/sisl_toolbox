@@ -68,22 +68,10 @@ double Path::CurveAbsToPathAbs(double abscissaCurve_m, int curveId) {
 
     if(curveId < 0 or curveId > (curvesNumber_ - 1)) 
         throw std::runtime_error(std::string("[Path::CurveAbsToPathAbs] CurveId out of bound!!"));
+    if(abscissaCurve_m > curves_[curveId]->Length())
+        throw std::runtime_error(std::string("[Path::CurveAbsToPathAbs] abscissaCurve_m is out of bound!!"));
 
-
-    // Eval abscissa_m up to the start of the curve of curveId
-    for(auto i = 0; i < curveId; ++i)
-        abscissa_m += curves_[i]->Length();
-
-    if(abscissaCurve_m < curves_[curveId]->StartParameter_m()) {
-        //overBound.setLower(abscissaCurve_m, curves_[curveId]->StartParameter_m());
-    }
-    else if (abscissaCurve_m > curves_[curveId]->EndParameter_m()) {
-        //overBound.setUpper(abscissaCurve_m, curves_[curveId]->EndParameter_m());
-        abscissa_m += curves_[curveId]->Length();
-    }
-    else {
-        abscissa_m += abscissaCurve_m;
-    }
+    abscissa_m += abscissaCurve_m;
     
     return abscissa_m;
 }
