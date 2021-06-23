@@ -119,6 +119,14 @@ public:
      */
     Eigen::Vector3d FindClosestPoint(Eigen::Vector3d& worldF_position);  
 
+    /**
+     * @brief Find Abscissa of the Closest Point w.r.t. the path.  
+     * 
+     * @param[in] worldF_position point in the find closest point problem.
+     *  
+     * @return The abscissa of the closest point on path.
+     */
+    double FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position);
 
     /**
      * @brief Extract a path portion given as input the start/end values.
@@ -157,6 +165,17 @@ public:
      * @return std::vector<Eigen::Vector3d> contaning the intersection points.
      */
     std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
+
+    /** TODO: Aggiustare!!! */
+    /**
+    * @brief Eval e tangent frame at the abscissa.
+    * 
+    * @param[in] abscissa Parameter value where to calculate the tangent frame.
+    * @param[out] tangent Tangent component of the tangent 3D frame.
+    * @param[out] normal Normal component of the tangent 3D frame.
+    * @param[out] binormal Binormal component of the tangent 3D frame.
+    */
+    void EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal);
 
     // Define [] operator
     std::shared_ptr<Curve>& operator[](std::size_t const idx) { return curves_[idx]; }

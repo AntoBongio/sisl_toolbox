@@ -15,10 +15,13 @@ int main() {
     std::shared_ptr<Path> hippodrome;
 
     try {
-        hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{10, 0, 0}, 
-                                                                            Eigen::Vector3d{10, 10, 0}, Eigen::Vector3d{0, 10, 0}});
+        hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{-50, 10, -30}, Eigen::Vector3d{50, 10, -30}, 
+                                                                            Eigen::Vector3d{50, -10, -30}, Eigen::Vector3d{-50, -10, -30}});
+
 
         std::cout << *hippodrome << std::endl;
+
+        hippodrome->Reverse();
 
         auto end = std::chrono::high_resolution_clock::now();
         // Calculating total time taken by the program.

@@ -69,6 +69,7 @@ std::shared_ptr<Path> PathFactory::NewHippodrome(std::vector<Eigen::Vector3d> po
             hippodrome->AddCurveBack(std::make_shared<StraightLine>(points[2], points[3]));
 
             hippodrome->AddCurveBack(std::make_shared<CircularArc>(3.14, Eigen::Vector3d{0, 0, 1}, points[3], (points[3] + points[0]) / 2));
+
         }
         catch(size_t const & size) {
             throw "[PathFactory] -> Wrong number of points in Hyppodrome Factory! Received a vector of size " + std::to_string(size) + ", while expecting one of size 4.";

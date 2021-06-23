@@ -57,7 +57,6 @@ std::tuple<double, int> Path::PathAbsToCurveAbs(double abscissa_m) {
             abscissa_m = 0;
         }
     }
-    std::cout << "Return values: (abscissaCurve_m = " << abscissaCurve_m << ", curveId = " << curveId << ")" << std::endl;
     return std::make_tuple(abscissaCurve_m, curveId);
 }
 
@@ -221,12 +220,47 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position) {
     return closestPoint;
 }
 
+double Path::FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position) {
+
+    Eigen::Vector3d closestPoint{Eigen::Vector3d::Zero()};
+    double distance{0};
+    double minDistance{0};
+    double abscissaTmp_m{0};
+    int curveId{0};
+    double abscissa_m{0};
+
+    for(std::size_t i = 0; i < curves_.size(); ++i) {
+       
+        try {
+            std::tie(abscissaTmp_m, distance) = curves_[i]->FindClosestPoint(worldF_position);
+        } catch(std::runtime_error const& exception) {
+            throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
+        }
+
+        if(minDistance > 0 and distance < minDistance) {
+            minDistance = distance;
+            curveId = i;
+            abscissa_m = abscissaTmp_m;
+        }
+        else if (minDistance == 0){
+            minDistance = distance;
+            curveId = i;
+            abscissa_m = abscissaTmp_m;
+        }
+    }
+
+    return abscissa_m;
+}
+
 
 std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_m) {
     
     auto pathPortion = std::make_shared<Path>();
     double abscissaCurve_m{};
     int curveId{0};
+
+    if(startValue_m == endValue_m)
+        return pathPortion;
 
     if(startValue_m < startParameter_m_){
         throw std::runtime_error("[Path::ExtractSection] Input parameter error. startValue_m before startParameter_m_");
@@ -243,14 +277,14 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
 
         try {
             pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(
-            abscissaCurve_m, portionLength));
+            abscissaCurve_m, abscissaCurve_m + portionLength));
         } catch (std::runtime_error const& exception) {
             throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
         }       
-
         portionLength = 0;
     }
     else {
+
         try {
             pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(
                 abscissaCurve_m, curves_[curveId]->EndParameter_m()));
@@ -258,30 +292,29 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
             throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
         }
 
-        portionLength -= curves_[curveId]->EndParameter_m() - abscissaCurve_m;
+        portionLength -= (curves_[curveId]->EndParameter_m() - abscissaCurve_m);
         ++curveId;
     }
 
     while(portionLength > 0 and curveId < curvesNumber_ ) {
     
-        if(portionLength < curves_[curveId]->EndParameter_m()) {
+        if(portionLength < curves_[curveId]->Length()) {
             
             try {
                 pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(curves_[curveId]->StartParameter_m(), 
-                    portionLength));
+                    curves_[curveId]->StartParameter_m() + portionLength));
             } catch (std::runtime_error const& exception) {
                 throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
             }
-
             portionLength = 0;
         }
         else {
             pathPortion->AddCurveBack<Curve>(curves_[curveId]);
-            portionLength -= curves_[curveId]->EndParameter_m();
+            portionLength -= curves_[curveId]->Length();
             ++curveId;
         }
     }
-    
+
     return pathPortion;
 }
 
@@ -368,3 +401,17 @@ std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Curve> otherCurv
     return intersections;
 }
 
+
+void Path::EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal) {
+
+    double abscissaCurve{0};
+    double curveId{0};
+
+    try {
+        std::tie(abscissaCurve, curveId) = PathAbsToCurveAbs(abscissa_m);        
+    } catch (std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Path::EvalTangentFrame] -> ") + exception.what());
+    }
+
+    curves_[curveId]->EvalTangentFrame(abscissaCurve, tangent, normal, binormal);
+}

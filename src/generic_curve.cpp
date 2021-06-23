@@ -11,6 +11,7 @@ GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Ei
     , coefficients_{coefficients}
     {
         name_ = "Generic Curve";
+        startParameter_s_ = 0;
 
         int kind{2}; /* Type of curve.
                     = 1 : Polynomial B-spline curve.

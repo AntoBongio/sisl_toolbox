@@ -6,9 +6,9 @@ StraightLine::StraightLine(Eigen::Vector3d startPoint, Eigen::Vector3d endPoint,
     : Curve(dimension, order)
     {        
         name_ = "Straight Line";
+        startParameter_s_ = 0;
 
         if(startPoint == endPoint) {
-            startParameter_s_ = 0;
             endParameter_s_ = 0;
             startParameter_m_ = 0; 
             endParameter_m_ = 0;
@@ -16,6 +16,7 @@ StraightLine::StraightLine(Eigen::Vector3d startPoint, Eigen::Vector3d endPoint,
             curve_ = nullptr;
         }
         else {
+
             // Generate a straight line from startPoint to endPoint
             s1602(&startPoint[0], &endPoint[0], Order(), Dimension(), startParameter_s_, &endParameter_s_, &curve_, &statusFlag_);
 

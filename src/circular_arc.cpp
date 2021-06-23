@@ -8,6 +8,7 @@ CircularArc::CircularArc(double angle, Eigen::Vector3d axis, Eigen::Vector3d sta
     , centrePoint_{centrePoint}
     {
         name_ = "Circular Arc";
+        startParameter_s_ = 0;
 
         // Generate a circle according to the parameters (angle, axis, startPoint, centrePoint).
         s1303(&startPoint[0], Epsge(), angle_, &centrePoint_[0], &axis_[0], Dimension(), &curve_, &statusFlag_);
