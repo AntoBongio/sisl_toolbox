@@ -62,13 +62,27 @@ std::shared_ptr<Path> PathFactory::NewHippodrome(std::vector<Eigen::Vector3d> po
             if(points.size() != 4)
                 throw points.size();
 
+            // Sum over the edges, (x2 − x1)(y2 + y1). If the result is positive the curve is clockwise, 
+            // if it's negative the curve is counter-clockwise. (The result is twice the enclosed area, with a +/- convention.)
+            double sumOverEdges{0};
+            for(int i = 0; i < points.size() - 1; ++i) {
+                sumOverEdges += (points[i][0] - points[i+1][0])*(points[i][1] + points[i+1][1]);
+            }
+            sumOverEdges += (points[points.size() - 1][0] - points[0][0])*(points[points.size() - 1][1] + points[0][1]);
+
             hippodrome->AddCurveBack(std::make_shared<StraightLine>(points[0], points[1]));
 
-            hippodrome->AddCurveBack(std::make_shared<CircularArc>(3.14, Eigen::Vector3d{0, 0, 1}, points[1], (points[1] + points[2]) / 2));
+            if(sumOverEdges < 0)
+                hippodrome->AddCurveBack(std::make_shared<CircularArc>(3.14, Eigen::Vector3d{0, 0, -1}, points[1], (points[1] + points[2]) / 2));
+            else
+                hippodrome->AddCurveBack(std::make_shared<CircularArc>(-3.14, Eigen::Vector3d{0, 0, -1}, points[1], (points[1] + points[2]) / 2));
 
             hippodrome->AddCurveBack(std::make_shared<StraightLine>(points[2], points[3]));
 
-            hippodrome->AddCurveBack(std::make_shared<CircularArc>(3.14, Eigen::Vector3d{0, 0, 1}, points[3], (points[3] + points[0]) / 2));
+            if(sumOverEdges < 0)
+                hippodrome->AddCurveBack(std::make_shared<CircularArc>(3.14, Eigen::Vector3d{0, 0, -1}, points[3], (points[3] + points[0]) / 2));
+            else
+                hippodrome->AddCurveBack(std::make_shared<CircularArc>(-3.14, Eigen::Vector3d{0, 0, -1}, points[3], (points[3] + points[0]) / 2));
 
         }
         catch(size_t const & size) {

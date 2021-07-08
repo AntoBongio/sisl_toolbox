@@ -95,7 +95,7 @@ dataPolygon = pd.DataFrame(dataPolygon)
 xPolygon = dataPolygon[1]
 yPolygon = dataPolygon[0]
 zPolygon = -dataPolygon[2]
-ax.plot3D(xPolygon, yPolygon, zPolygon, 'red', label='Polygon')
+#ax.plot3D(xPolygon, yPolygon, zPolygon, 'red', label='Polygon')
 
 
 ax.legend()

@@ -20,7 +20,8 @@ Curve::Curve(SISLCurve *curve, int dimension, int order)
         s1363(curve_, &startParameter_s_, &endParameter_s_, &statusFlag_);
 
         // Pick curve length.
-        s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);             
+        // s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);             
+        s1240(curve_, Epsge(), &length_, &statusFlag_);  
 
         try {
             FromAbsSislToPos(startParameter_s_, startPoint_);
@@ -29,9 +30,8 @@ Curve::Curve(SISLCurve *curve, int dimension, int order)
             throw std::runtime_error(std::string{"[Curve::Curve] -> "} + exception.what());
         }
 
-        startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_);
-
-        length_ = std::abs(endParameter_m_ - startParameter_m_);
+        startParameter_m_ = startParameter_s_ * (length_ / (endParameter_s_ - startParameter_s_));
+        endParameter_m_ = endParameter_s_ * (length_ / (endParameter_s_ - startParameter_s_));
     }
 
 
@@ -50,7 +50,7 @@ double Curve::SislAbsToMeterAbs(double abscissa_s)
             throw std::runtime_error("[Curve::SislAbsToMeterAbs] Input parameter error. abscissa_s before endParameter_s_");
     }
  
-    return abscissa_s * (endParameter_m_ / endParameter_s_);
+    return abscissa_s * (length_ / (endParameter_s_ - startParameter_s_));
 }
 
 
@@ -69,7 +69,7 @@ double Curve::MeterAbsToSislAbs(double abscissa_m)
             throw std::runtime_error("[Curve::MeterAbsToSislAbs] Input parameter error. abscissa_m before endParameter_m_");
     }
  
-    return abscissa_m * (endParameter_s_ / endParameter_m_);
+    return abscissa_m * ((endParameter_s_ - startParameter_s_) / length_);
 }
 
 

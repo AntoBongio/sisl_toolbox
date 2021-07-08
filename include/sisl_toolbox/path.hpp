@@ -129,6 +129,17 @@ public:
     double FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position);
 
     /**
+     * @brief Find Abscissa of the Closest Point on an interval of the path.  
+     * 
+     * @param[in] worldF_position point in the find closest point problem.
+     * @param[in] start first abscissa value of the path section.
+     * @param[in] end last abscissa value of the path section.
+     *  
+     * @return The abscissa of the closest point on path.
+     */
+    double FindAbscissaClosestPointOnInterval(Eigen::Vector3d& worldF_position, double startValue, double endValue);
+
+    /**
      * @brief Extract a path portion given as input the start/end values.
      * 
      * @param[in] startValue_m Start abscissa value for the path extraction.

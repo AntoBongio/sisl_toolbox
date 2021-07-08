@@ -222,7 +222,6 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position) {
 
 double Path::FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position) {
 
-    Eigen::Vector3d closestPoint{Eigen::Vector3d::Zero()};
     double distance{0};
     double minDistance{0};
     double abscissaTmp_m{0};
@@ -249,7 +248,49 @@ double Path::FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position) {
         }
     }
 
+    for(int i = 0; i < curveId; ++i) {
+        abscissa_m += curves_[i]->Length();
+    }
+    // std::cout << "[Path::FindAbscissaClosestPoint] -> abscissa_m: " << abscissa_m << std::endl;
+
     return abscissa_m;
+}
+
+
+double Path::FindAbscissaClosestPointOnInterval(Eigen::Vector3d& worldF_position, double startValue, double endValue) {
+
+    double distance{0};
+    double minDistance{0};
+    double abscissaTmp_m{0};
+    int curveId{0};
+    double abscissa_m{0};
+
+    auto section = ExtractSection(startValue, endValue);
+
+    for(std::size_t i = 0; i < section->CurvesNumber(); ++i) {
+        try {
+            std::tie(abscissaTmp_m, distance) = section->Curves()[i]->FindClosestPoint(worldF_position);
+        } catch(std::runtime_error const& exception) {
+            throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
+        }
+
+        if(minDistance > 0 and distance < minDistance) {
+            minDistance = distance;
+            curveId = i;
+            abscissa_m = abscissaTmp_m;
+        }
+        else if (minDistance == 0){
+            minDistance = distance;
+            curveId = i;
+            abscissa_m = abscissaTmp_m;
+        }
+    }
+
+    for(int i = 0; i < curveId; ++i) {
+        abscissa_m += section->Curves()[i]->Length();
+    }
+
+    return abscissa_m + startValue;
 }
 
 
@@ -277,7 +318,7 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
 
         try {
             pathPortion->AddCurveBack<Curve>(curves_[curveId]->ExtractSection(
-            abscissaCurve_m, abscissaCurve_m + portionLength));
+                abscissaCurve_m, abscissaCurve_m + portionLength));
         } catch (std::runtime_error const& exception) {
             throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
         }       
@@ -291,7 +332,6 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
         } catch (std::runtime_error const& exception) {
             throw std::runtime_error(std::string("[Path::ExtractSection] -> ") + exception.what());
         }
-
         portionLength -= (curves_[curveId]->EndParameter_m() - abscissaCurve_m);
         ++curveId;
     }
@@ -310,7 +350,7 @@ std::shared_ptr<Path> Path::ExtractSection(double startValue_m, double endValue_
         }
         else {
             pathPortion->AddCurveBack<Curve>(curves_[curveId]);
-            portionLength -= curves_[curveId]->Length();
+            portionLength -= pathPortion->LastCurve()->Length();;
             ++curveId;
         }
     }
