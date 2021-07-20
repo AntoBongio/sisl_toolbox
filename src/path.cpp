@@ -385,6 +385,31 @@ std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Path> otherPath)
     return intersections;
 }
 
+std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Curve> otherCurve) {
+
+    std::vector<Eigen::Vector3d> intersections;
+    std::vector<Eigen::Vector3d> intersectionPoints;
+
+    for(auto const & curve: curves_) {
+
+        try {
+
+            intersectionPoints = curve->Intersection(otherCurve);
+
+        } catch (std::runtime_error const& exception) {
+            throw std::runtime_error(std::string("[Path::Intersection] -> ") + exception.what());
+        }
+
+        for (auto const & point: intersectionPoints) {
+            if (std::count(intersections.begin(), intersections.end(), point) == 0) {
+                intersections.push_back(point);
+            }
+        }
+    }
+    
+    return intersections;
+}
+
 
 std::vector<Eigen::Vector3d> Path::Intersection(int curveId, std::shared_ptr<Path> otherPath) {
 
@@ -415,31 +440,32 @@ std::vector<Eigen::Vector3d> Path::Intersection(int curveId, std::shared_ptr<Pat
     return intersections;
 }
 
-
-std::vector<Eigen::Vector3d> Path::Intersection(std::shared_ptr<Curve> otherCurve) {
+std::vector<Eigen::Vector3d> Path::Intersection(int curveId, std::shared_ptr<Curve> otherCurve) {
 
     std::vector<Eigen::Vector3d> intersections;
+
+    if(curveId > curvesNumber_ - 1)
+        return intersections;
+    
     std::vector<Eigen::Vector3d> intersectionPoints;
 
-    for(auto const & curve: curves_) {
+    try {
 
-        try {
+        intersectionPoints = curves_[curveId]->Intersection(otherCurve);
 
-            intersectionPoints = curve->Intersection(otherCurve);
+    } catch (std::runtime_error const& exception) {
+        throw std::runtime_error(std::string("[Path::Intersection] -> ") + exception.what());
+    }
 
-        } catch (std::runtime_error const& exception) {
-            throw std::runtime_error(std::string("[Path::Intersection] -> ") + exception.what());
-        }
-
-        for (auto const & point: intersectionPoints) {
-            if (std::count(intersections.begin(), intersections.end(), point) == 0) {
-                intersections.push_back(point);
-            }
+    for (auto const & point: intersectionPoints) {
+        if (std::count(intersections.begin(), intersections.end(), point) == 0) {
+            intersections.push_back(point);
         }
     }
-    
+
     return intersections;
 }
+
 
 
 void Path::EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal) {

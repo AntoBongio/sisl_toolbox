@@ -8,7 +8,8 @@ Curve::Curve(int dimension, int order)
     , endParameter_m_{0}
     , startParameter_m_{0}
     , length_{0}
-    , epsge_{0.000001} {}
+    , epsge_{0.000001} 
+    , curve_ {nullptr} {}
 
 
 Curve::Curve(SISLCurve *curve, int dimension, int order) 
@@ -172,6 +173,10 @@ double Curve::Curvature(double abscissa_m) {
 void Curve::Reverse() 
 {
     s1706(curve_);
+
+    FromAbsSislToPos(startParameter_s_, startPoint_);
+    FromAbsSislToPos(endParameter_s_, endPoint_);
+
 }
 
 
@@ -275,18 +280,6 @@ std::vector<Eigen::Vector3d> Curve::Intersection(std::shared_ptr<Curve> otherCur
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-/** FIX: DA FARE!!! */
 void Curve::EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal)
 {
     

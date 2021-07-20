@@ -14,6 +14,9 @@ int main() {
 
     std::shared_ptr<Path> hippodrome;
 
+    hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{-50, 10, 0}, Eigen::Vector3d{50, 10, 0}, 
+                                                                         Eigen::Vector3d{50, -10, 0}, Eigen::Vector3d{-50, -10, 0}});
+
     try {
         hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{-50, 10, 0}, Eigen::Vector3d{50, 10, 0}, 
                                                                             Eigen::Vector3d{50, -10, 0}, Eigen::Vector3d{-50, -10, 0}});

@@ -139,8 +139,6 @@ public:
 
 
 
-
-    /** TODO: Aggiustare!!! */
     /**
     * @brief Transform the abscissa value into a distance in meters from the starting point.
     * @details The tangntial direction depends on the direction of the curve. Starting from this vector, the normal component is calculated as cross product among 
@@ -152,8 +150,6 @@ public:
     */
     void EvalTangentFrame(double abscissa_m, Eigen::Vector3d& tangent, Eigen::Vector3d& normal, Eigen::Vector3d& binormal);
 
-
-    
 
 
 

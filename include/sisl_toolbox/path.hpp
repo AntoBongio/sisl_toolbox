@@ -87,7 +87,7 @@ public:
      * @brief Sampling the path. The total points are equally distributed among the curves, without keeping into account 
      *        the length of each curve.
      * 
-     * @param samples
+     * @param samples number of samples.
      * 
      * @return std::shared_ptr<std::vector<Eigen::Vector3d>> containing the points.
      */
@@ -159,6 +159,15 @@ public:
     std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Path> otherPath);
 
     /**
+     * @brief Eval intersections among curve passed as argument and the current path.
+     * 
+     * @param[in] otherCurve shared_ptr to the curve.
+     *  
+     * @return std::vector<Eigen::Vector3d> contaning the intersection points.
+     */
+    std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
+
+    /**
      * @brief Eval intersections among the i-th curve of the current path and another path.
      * 
      * @param[in] curveId Id of the curve of the current path.
@@ -169,15 +178,15 @@ public:
     std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Path> otherPath);  
 
     /**
-     * @brief Eval intersections among curve passed as argument and the current path.
+     * @brief Eval intersections among the i-th curve of the current path and another curve.
      * 
+     * @param[in] curveId Id of the curve of the current path.
      * @param[in] otherCurve shared_ptr to the curve.
      *  
      * @return std::vector<Eigen::Vector3d> contaning the intersection points.
      */
-    std::vector<Eigen::Vector3d> Intersection(std::shared_ptr<Curve> otherCurve);
+    std::vector<Eigen::Vector3d> Intersection(int curveId, std::shared_ptr<Curve> otherCurve);  
 
-    /** TODO: Aggiustare!!! */
     /**
     * @brief Eval e tangent frame at the abscissa.
     * 
