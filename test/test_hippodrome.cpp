@@ -14,19 +14,21 @@ int main() {
 
     std::shared_ptr<Path> hippodrome;
 
-    hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{-50, 10, 0}, Eigen::Vector3d{50, 10, 0}, 
-                                                                         Eigen::Vector3d{50, -10, 0}, Eigen::Vector3d{-50, -10, 0}});
+    // auto test = std::make_shared<StraightLine>(Eigen::Vector3d{50, 10, 0}, Eigen::Vector3d{50, -10, 20});
+    // std::cout << "*************************  TEST  *************************" << std::endl;
+    // std::cout << *test << std::endl;
+    // std::cout << "StartPoint: [" << test->StartPoint()[0] << ", " << test->StartPoint()[1] << ", " << test->StartPoint()[2] 
+    //     << "], endPoint: [" << test->EndPoint()[0] << ", " << test->EndPoint()[1] << ", " << test->EndPoint()[2] 
+    //     << "]" << std::endl;
 
     try {
         hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{-50, 10, 0}, Eigen::Vector3d{50, 10, 0}, 
-                                                                            Eigen::Vector3d{50, -10, 0}, Eigen::Vector3d{-50, -10, 0}});
+                                                                            Eigen::Vector3d{50, -10, 0}, Eigen::Vector3d{-50, -10, 20}});
 
         // hippodrome = PathFactory::NewHippodrome(std::vector<Eigen::Vector3d>{Eigen::Vector3d{10, -50, 0}, Eigen::Vector3d{10, 50, 0}, 
         //                                                                    Eigen::Vector3d{-10, 50, 0}, Eigen::Vector3d{-10, -50, 0}});
 
         std::cout << *hippodrome << std::endl;
-
-        hippodrome->Reverse();
 
         auto end = std::chrono::high_resolution_clock::now();
         // Calculating total time taken by the program.
@@ -42,8 +44,44 @@ int main() {
 
         // std::cout << std::endl << hippodrome->Name() << " is composed by: " << std::endl;
         // for(int i = 0; i < hippodrome->CurvesNumber(); ++i) {
-        //     std::cout << i << ". " << *hippodrome->Curves()[i] << std::endl;
+        //     std::cout << i << ". " << *hippodrome->Curves()[i] << "\n" 
+        //         << "StartPoint: [" << (hippodrome->Curves()[i])->StartPoint()[0] << ", " << (hippodrome->Curves()[i])->StartPoint()[1] 
+        //         << ", " << (hippodrome->Curves()[i])->StartPoint()[2] << "], endPoint: [" << (hippodrome->Curves()[i])->EndPoint()[0] 
+        //         << ", " << (hippodrome->Curves()[i])->EndPoint()[1] << ", " << (hippodrome->Curves()[i])->EndPoint()[2] 
+        //         << "]" << std::endl;
         // }
+        
+        // Eigen::Vector3d tangent;
+        // Eigen::Vector3d normal;
+        // Eigen::Vector3d binormal;
+
+        // hippodrome->EvalTangentFrame(50, tangent, normal, binormal);
+        // std::cout << "At 50 -> tangent [" << tangent[0] << ", " << tangent[1] << ", " << tangent[2] << "], normal: [" << normal[0] 
+        //         << ", " << normal[1] << ", " << normal[2] << "], binormal [" << binormal[0] << ", " << binormal[1] << ", " << binormal[2] 
+        //         << "]" << std::endl;
+        
+        // hippodrome->EvalTangentFrame(115, tangent, normal, binormal);
+        // std::cout << "At 115 -> tangent [" << tangent[0] << ", " << tangent[1] << ", " << tangent[2] << "], normal: [" << normal[0] 
+        //         << ", " << normal[1] << ", " << normal[2] << "], binormal [" << binormal[0] << ", " << binormal[1] << ", " << binormal[2] 
+        //         << "]" << std::endl;
+        
+        // hippodrome->EvalTangentFrame(181, tangent, normal, binormal);
+        // std::cout << "At 181 -> tangent [" << tangent[0] << ", " << tangent[1] << ", " << tangent[2] << "], normal: [" << normal[0] 
+        //         << ", " << normal[1] << ", " << normal[2] << "], binormal [" << binormal[0] << ", " << binormal[1] << ", " << binormal[2] 
+        //         << "]" << std::endl;
+
+        // hippodrome->EvalTangentFrame(245, tangent, normal, binormal);
+        // std::cout << "At 245 -> tangent [" << tangent[0] << ", " << tangent[1] << ", " << tangent[2] << "], normal: [" << normal[0] 
+        //         << ", " << normal[1] << ", " << normal[2] << "], binormal [" << binormal[0] << ", " << binormal[1] << ", " << binormal[2] 
+        //         << "]" << std::endl;
+
+
+        // auto test = std::make_shared<StraightLine>(Eigen::Vector3d{50, 10, 0}, Eigen::Vector3d{50, -10, 20});
+        // std::cout << "*************************  TEST  *************************" << std::endl;
+        // std::cout << *test << std::endl;
+        // std::cout << "StartPoint: [" << test->StartPoint()[0] << ", " << test->StartPoint()[1] << ", " << test->StartPoint()[2] 
+        //     << "], endPoint: [" << test->EndPoint()[0] << ", " << test->EndPoint()[1] << ", " << test->EndPoint()[2] 
+        //     << "]" << std::endl;
 
 
         /***************** Parametrizations mapping *****************/

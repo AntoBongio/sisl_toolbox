@@ -36,16 +36,20 @@ GenericCurve::GenericCurve(int degree, std::vector<double> knots, std::vector<Ei
 
         curve_ = newCurve(points_.size(), degree_ + 1, &knots_[0], &coefficients_[0], kind, Dimension(), copy);
 
-        // Pick parameters range of the circle.
+        // Pick parameters range of the curve.
         s1363(curve_, &startParameter_s_, &endParameter_s_, &statusFlag_);
 
         // Pick curve length.
-        s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);  
+        // s1240(curve_, Epsge(), &endParameter_m_, &statusFlag_);             
+        s1240(curve_, Epsge(), &length_, &statusFlag_);  
 
-        FromAbsSislToPos(startParameter_s_, startPoint_);
-        FromAbsSislToPos(endParameter_s_, endPoint_);    
+        try {
+            FromAbsSislToPos(startParameter_s_, startPoint_);
+            FromAbsSislToPos(endParameter_s_, endPoint_);
+        } catch(std::runtime_error const& exception) {
+            throw std::runtime_error(std::string{"[Curve::Curve] -> "} + exception.what());
+        }
 
-        startParameter_m_ = startParameter_s_ * (endParameter_m_ / endParameter_s_); 
-
-        length_ = std::abs(endParameter_m_ - startParameter_m_);
+        startParameter_m_ = startParameter_s_ * (length_ / (endParameter_s_ - startParameter_s_));
+        endParameter_m_ = endParameter_s_ * (length_ / (endParameter_s_ - startParameter_s_));
     }
