@@ -66,7 +66,7 @@ target_compile_features(sisl_toolbox
 #    MyOtherLibrary)
 
 # 'make install' to the correct locations (provided by GNUInstallDirs).
-install(TARGETS sisl_toolbox EXPORT sisl_toolbox_config
+install(TARGETS sisl_toolbox EXPORT sisl_toolbox-config
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
@@ -75,10 +75,10 @@ install(DIRECTORY include/sisl_toolbox DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT sisl_toolbox_config DESTINATION share/sisl_toolbox/cmake)
+install(EXPORT sisl_toolbox-config DESTINATION share/sisl_toolbox/cmake)
 
 # This makes the project importable from the build directory
-export(TARGETS sisl_toolbox FILE sisl_toolbox_config.cmake)
+export(TARGETS sisl_toolbox FILE sisl_toolbox-config.cmake)
 
 
 if(BUILD_TESTS)
