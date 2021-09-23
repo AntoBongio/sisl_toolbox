@@ -14,10 +14,10 @@ bool PersistenceManager::SaveObj(std::shared_ptr<std::vector<Eigen::Vector3d>> p
         }
 
         file->close();
+        return true;
 
     } catch (std::exception& e) {
         std::cerr << "Exception thrown: " << e.what() << std::endl;
-        return -1;
+        return false;
     }
-
 }

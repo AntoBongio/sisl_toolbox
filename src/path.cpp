@@ -25,11 +25,14 @@ std::tuple<double, int> Path::PathAbsToCurveAbs(double abscissa_m) {
 
     double curveLength {curves_[curveId]->Length()};
 
+    std::cout << "[Path::PathAbsToCurveAbs] abscissa_m: " << abscissa_m << std::endl;
+
     while(abscissa_m > 0) {
         if(abscissa_m > curveLength and curveId < curvesNumber_) {
             abscissa_m -= curveLength;
             ++curveId;
             curveLength = curves_[curveId]->Length();
+            std::cout << "[Path::PathAbsToCurveAbs] abscissa_m: " << abscissa_m << std::endl;
         }
         else {
             if(curves_[curveId]->StartParameter_m() >= 0 and curves_[curveId]->EndParameter_m() >= 0) {
@@ -131,9 +134,13 @@ std::shared_ptr<std::vector<Eigen::Vector3d>> Path::Sampling(int samples) const 
 
     int singleCurveSamples{ static_cast<int>(samples / curvesNumber_) };
 
+    std::cout << "[Path::Sampling] singleCurveSamples: " << singleCurveSamples << std::endl;
+
     for(int i = 0; i < curvesNumber_; ++i) {
         curve = curves_[i]->Sampling(singleCurveSamples);
+        std::cout << "[Path::Sampling] wrap around path-<insert()" << std::endl;
         path->insert( path->end(), curve->begin(), curve->end() );
+        std::cout << "[Path::Sampling] wrap around path-<insert()" << std::endl;
         }
 
     return path;
@@ -152,9 +159,10 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& cu
 
     Eigen::Vector3d closestPoint{Eigen::Vector3d::Zero()};
     double distance{0};
-    double minDistance{0};
+    double minDistance{std::numeric_limits<double>::max()};
     double abscissaTmp_m{0};
 
+    
     for(std::size_t i = 0; i < curves_.size(); ++i) {
         
         try {
@@ -163,12 +171,12 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position, int& cu
             throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
         }
 
-        if(minDistance > 0 and distance < minDistance) {
+        if(distance > 0 and distance < minDistance) {
             minDistance = distance;
             curveId = i;
             abscissa_m = abscissaTmp_m;
         }
-        else if (minDistance == 0){
+        else if (distance == 0){
             minDistance = distance;
             curveId = i;
             abscissa_m = abscissaTmp_m;
@@ -187,7 +195,7 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position) {
 
     Eigen::Vector3d closestPoint{Eigen::Vector3d::Zero()};
     double distance{0};
-    double minDistance{0};
+    double minDistance{std::numeric_limits<double>::max()};
     double abscissaTmp_m{0};
     int curveId{0};
     double abscissa_m{0};
@@ -200,12 +208,12 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position) {
             throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
         }
 
-        if(minDistance > 0 and distance < minDistance) {
+        if(distance > 0 and distance < minDistance) {
             minDistance = distance;
             curveId = i;
             abscissa_m = abscissaTmp_m;
         }
-        else if (minDistance == 0){
+        else if (distance == 0){
             minDistance = distance;
             curveId = i;
             abscissa_m = abscissaTmp_m;
@@ -223,7 +231,7 @@ Eigen::Vector3d Path::FindClosestPoint(Eigen::Vector3d& worldF_position) {
 double Path::FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position) {
 
     double distance{0};
-    double minDistance{0};
+    double minDistance{std::numeric_limits<double>::max()};
     double abscissaTmp_m{0};
     int curveId{0};
     double abscissa_m{0};
@@ -236,12 +244,12 @@ double Path::FindAbscissaClosestPoint(Eigen::Vector3d& worldF_position) {
             throw std::runtime_error(std::string{"[Path::FindClosestPoint] -> "} + exception.what());
         }
 
-        if(minDistance > 0 and distance < minDistance) {
+        if(distance > 0 and distance < minDistance) {
             minDistance = distance;
             curveId = i;
             abscissa_m = abscissaTmp_m;
         }
-        else if (minDistance == 0){
+        else if (distance == 0){
             minDistance = distance;
             curveId = i;
             abscissa_m = abscissaTmp_m;

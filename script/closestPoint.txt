@@ -1,2 +1,2 @@
-FindNear 15.5 13 0
-ClosestPoint 15.5 10 0
+FindNear 0.3 0 0
+ClosestPoint 0.3 0 0

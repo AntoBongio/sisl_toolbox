@@ -5,6 +5,8 @@
 import sys
 import time
 import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D #
 data = pd.read_csv('path.txt', sep='\s+', header=None)
 data = pd.DataFrame(data)
 
@@ -43,8 +45,6 @@ if len(sys.argv) > 1:
         for index in range(len(dataIntersections)):
             intersection_points.append([dataIntersections[1][index], dataIntersections[0][index], -dataIntersections[2][index], dataIntersections[3][index]])
 
-
-import matplotlib.pyplot as plt
 figure = plt.figure()
 figure.set_figwidth(10)
 figure.set_figheight(12)
@@ -52,6 +52,7 @@ ax = plt.axes(projection='3d',  adjustable='box')
 plt.title('Path')
 plt.xlabel("y")
 plt.ylabel("x")
+plt.ylabel("z")
 
 x = data[1]
 y = data[0]
@@ -90,11 +91,11 @@ if len(sys.argv) > 1:
 
 
 # ADDED
-dataPolygon = pd.read_csv('polygon.txt', sep='\s+', header=None)
-dataPolygon = pd.DataFrame(dataPolygon)
-xPolygon = dataPolygon[1]
-yPolygon = dataPolygon[0]
-zPolygon = -dataPolygon[2]
+#dataPolygon = pd.read_csv('polygon.txt', sep='\s+', header=None)
+#dataPolygon = pd.DataFrame(dataPolygon)
+#xPolygon = dataPolygon[1]
+#yPolygon = dataPolygon[0]
+#zPolygon = -dataPolygon[2]
 #ax.plot3D(xPolygon, yPolygon, zPolygon, 'red', label='Polygon')
 
 
