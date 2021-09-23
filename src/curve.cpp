@@ -191,8 +191,6 @@ std::shared_ptr<std::vector<Eigen::Vector3d>> Curve::Sampling(int const samples)
 
     for (double k = 0; k < samples; ++k) {
         param = startParameter_s_ + k / (samples - 1) * (endParameter_s_ - startParameter_s_);
-        std::cout << "[Curve::Sampling] param: " << param << std::endl;
-
         s1221(curve_, 0, param, &left, &pos[0], &status);
         
         curve->emplace_back(Eigen::Vector3d{pos[0], pos[1], pos[2]});

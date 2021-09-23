@@ -25,14 +25,12 @@ std::tuple<double, int> Path::PathAbsToCurveAbs(double abscissa_m) {
 
     double curveLength {curves_[curveId]->Length()};
 
-    std::cout << "[Path::PathAbsToCurveAbs] abscissa_m: " << abscissa_m << std::endl;
 
     while(abscissa_m > 0) {
         if(abscissa_m > curveLength and curveId < curvesNumber_) {
             abscissa_m -= curveLength;
             ++curveId;
             curveLength = curves_[curveId]->Length();
-            std::cout << "[Path::PathAbsToCurveAbs] abscissa_m: " << abscissa_m << std::endl;
         }
         else {
             if(curves_[curveId]->StartParameter_m() >= 0 and curves_[curveId]->EndParameter_m() >= 0) {
@@ -134,13 +132,10 @@ std::shared_ptr<std::vector<Eigen::Vector3d>> Path::Sampling(int samples) const 
 
     int singleCurveSamples{ static_cast<int>(samples / curvesNumber_) };
 
-    std::cout << "[Path::Sampling] singleCurveSamples: " << singleCurveSamples << std::endl;
 
     for(int i = 0; i < curvesNumber_; ++i) {
         curve = curves_[i]->Sampling(singleCurveSamples);
-        std::cout << "[Path::Sampling] wrap around path-<insert()" << std::endl;
         path->insert( path->end(), curve->begin(), curve->end() );
-        std::cout << "[Path::Sampling] wrap around path-<insert()" << std::endl;
         }
 
     return path;
