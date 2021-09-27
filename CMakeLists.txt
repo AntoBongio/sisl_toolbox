@@ -98,6 +98,9 @@ if(BUILD_TESTS)
     add_executable(test_race_track test/test_race_track.cpp)
     target_link_libraries(test_race_track sisl_toolbox)
 
+    add_executable(test_generic_curve test/test_generic_curve.cpp)
+    target_link_libraries(test_generic_curve sisl_toolbox)
 
-    add_test(test_hippodrome test_polygon test_spiral test_serpentine test_race_track)
+
+    add_test(test_hippodrome test_polygon test_spiral test_serpentine test_race_track test_generic_curve)
 endif(BUILD_TESTS)
