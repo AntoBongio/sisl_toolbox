@@ -33,9 +33,6 @@ int main() {
     points.push_back(Eigen::Vector3d{x_final + 2 * look_ahead * cos(heading_final), y_final + look_ahead * 2 * sin(heading_final), 0.0});
     points.push_back(Eigen::Vector3d{x_final + look_ahead * cos(heading_final), y_final + look_ahead * sin(heading_final), 0.0});
     points.push_back(Eigen::Vector3d{x_final, y_final, 0.0});
-    points.push_back(Eigen::Vector3d{3.0, 3.0, 0.0});
-    points.push_back(Eigen::Vector3d{3.5, 3.0, 0.0});
-    points.push_back(Eigen::Vector3d{4.0, 3.0, 0.0});
 
     std::vector<double> weights {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
