@@ -11,7 +11,7 @@ Its major features are:
 3. Definition of a **PathFactory** class implementing the logic to automatically build different paths: [Polygonal Chain, Polygon, Hippodrome, Spiral, Race Track, Serpentine]. Each Method returns a shared_ptr **Path**.
 ## Dependencies
 Before building the repository you will have to install the following dependencies:
-* Eigen 3: `sudo apt install libeigen3-dev`
+* Eigen 3: `https://gitlab.com/libeigen/eigen/-/releases/3.4.0`
 * SISL: `git clone https://github.com/SINTEF-Geometry/SISL.git`
 
 ## Building and installing
